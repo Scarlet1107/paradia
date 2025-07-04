@@ -9,7 +9,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
+import { Heart, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const DOT_COUNT = 8;
@@ -20,7 +20,10 @@ export default function Post({
 }: {
   post: { id: string; content: string; createdAt: string };
 }) {
+  // likeCount が null → ロード中
   const [likeCount, setLikeCount] = useState<number | null>(null);
+  const [prevCount, setPrevCount] = useState<number>(0);
+  const [direction, setDirection] = useState<"up" | "down">("up");
   const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -34,7 +37,9 @@ export default function Post({
         if (!res.ok) throw new Error("Fetch failed");
         const { count, liked } = await res.json();
         if (!isMounted) return;
+        setPrevCount(count);
         setLikeCount(count);
+        setDirection("up");
         setLiked(liked);
       } catch (e) {
         console.error(e);
@@ -52,14 +57,21 @@ export default function Post({
     if (loading || initialLoading) return;
     setLoading(true);
 
+    const oldCount = likeCount ?? 0;
     const newState = !liked;
+    const newCountValue = oldCount + (newState ? 1 : -1);
+
+    // アニメーション用に前後の数値と方向を保存
+    setPrevCount(oldCount);
+    setDirection(newCountValue > oldCount ? "up" : "down");
+
+    // UI先行更新
     setLiked(newState);
-    setLikeCount((c) => (c ?? 0) + (newState ? 1 : -1));
+    setLikeCount(newCountValue);
 
     // trigger explosion when liking
     if (newState) {
       setExplode(true);
-      // clear after animation
       setTimeout(() => setExplode(false), 600);
     }
 
@@ -70,7 +82,7 @@ export default function Post({
     if (!res.ok) {
       // rollback on error
       setLiked(!newState);
-      setLikeCount((c) => (c ?? 0) + (newState ? -1 : 1));
+      setLikeCount(oldCount);
     }
     setLoading(false);
   };
@@ -138,7 +150,18 @@ export default function Post({
           {initialLoading ? (
             <span className="animate-pulse text-sm text-gray-400">…</span>
           ) : (
-            <span className="text-sm">{likeCount}</span>
+            <AnimatePresence initial={false} mode="popLayout">
+              <motion.span
+                key={likeCount}
+                initial={{ y: direction === "up" ? 10 : -10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: direction === "up" ? -10 : 10, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="text-sm"
+              >
+                {likeCount}
+              </motion.span>
+            </AnimatePresence>
           )}
         </Button>
       </CardFooter>
