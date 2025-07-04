@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileNavigation } from "./MobileNavigation";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import Image from "next/image";
 const navItems = [
   {
     href: "/protected/home",
@@ -30,8 +31,8 @@ const Header = () => {
   const isMobile = useIsMobile();
   return (
     <header className="flex w-screen items-center justify-between bg-gray-200 p-4 md:px-16">
-      <Link href={"/protected/home"} className="text-xl md:text-2xl">
-        Scarlet7.net
+      <Link href={"/protected/home"}>
+        <Image src={"/paradia_1.png"} alt="PARADIA" height={100} width={150} />
       </Link>
       <div className="md:ox flex items-center gap-4">
         {isMobile ? (
