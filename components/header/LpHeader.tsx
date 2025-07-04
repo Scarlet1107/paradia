@@ -7,7 +7,7 @@ const LpHeader = () => {
   return (
     <header className="flex w-screen items-center justify-between gap-4 bg-gray-100 p-8 md:px-16">
       <Link href={"/"}>
-        <Image src={"/paradia_1.png"} alt="PARADIA" height={100} width={150} />
+        <Image src={"/header.png"} alt="PARADIA" height={100} width={150} />
       </Link>
       <ThemeSwitcher />
     </header>

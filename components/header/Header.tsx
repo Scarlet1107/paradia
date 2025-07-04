@@ -5,7 +5,7 @@ import { Home as HomeIcon, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { MobileNavigation } from "./MobileNavigation";
+import { MobileNavigation } from "../MobileNavigation";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import Image from "next/image";
 const navItems = [
@@ -30,9 +30,15 @@ const Header = () => {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   return (
-    <header className="flex w-screen items-center justify-between bg-gray-200 p-4 md:px-16">
+    <header className="flex w-screen items-center justify-between bg-gray-50 p-4 md:px-16">
       <Link href={"/protected/home"}>
-        <Image src={"/paradia_1.png"} alt="PARADIA" height={100} width={150} />
+        <Image
+          src={"/header.png"}
+          alt="PARADIA"
+          height={100}
+          width={190}
+          className="mb-2"
+        />
       </Link>
       <div className="md:ox flex items-center gap-4">
         {isMobile ? (
