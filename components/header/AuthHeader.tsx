@@ -5,7 +5,7 @@ import Image from "next/image";
 
 const AuthHeader = () => {
   return (
-    <header className="flex w-screen items-center justify-between gap-4 bg-gray-100 p-8 md:px-16">
+    <header className="flex w-screen items-center justify-between gap-4 bg-gray-50 p-8 shadow-sm md:px-16">
       <Link href={"/"} className="text-xl md:text-2xl">
         <Image
           src={"/header.png"}
