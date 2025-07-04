@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: `${defaultUrl}/paradia_1.png`,
+        url: `${defaultUrl}/open_graph.png`,
         width: 1200,
         height: 630,
         alt: "Paradiaのバナー画像",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     title: "Paradia - すべてがポジティブに包まれたSNS",
     description:
       "Paradiaは、市民が安心して前向きな思いを共有できる、秩序と調和のもとに運営される新時代のSNS",
-    images: ["/paradia_1.png"],
+    images: ["/header.png"],
   },
 };
 
