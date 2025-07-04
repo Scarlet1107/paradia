@@ -1,6 +1,5 @@
 import Link from "next/link";
 import React from "react";
-import { ThemeSwitcher } from "../ThemeSwitcher";
 import Image from "next/image";
 
 const LpHeader = () => {
@@ -9,7 +8,6 @@ const LpHeader = () => {
       <Link href={"/"}>
         <Image src={"/header.png"} alt="PARADIA" height={100} width={150} />
       </Link>
-      <ThemeSwitcher />
     </header>
   );
 };

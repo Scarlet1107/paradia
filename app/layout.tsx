@@ -4,6 +4,7 @@ import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import DynamicBackground from "@/components/dynamicBackground";
 
 const defaultUrl = process.env.NEXT_PUBLIC_BASE_URL
   ? `${process.env.NEXT_PUBLIC_BASE_URL}`
@@ -80,15 +81,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.className} flex min-h-screen flex-col items-center antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        {children}
+        <Toaster />
+        <DynamicBackground />
       </body>
     </html>
   );

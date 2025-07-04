@@ -1,5 +1,4 @@
 import React from "react";
-import { ThemeSwitcher } from "../ThemeSwitcher";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -30,7 +29,6 @@ const AuthHeader = () => {
             登録
           </Link>
         </div>
-        <ThemeSwitcher />
       </div>
     </header>
   );
