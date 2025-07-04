@@ -5,8 +5,7 @@ import { Home as HomeIcon, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { MobileNavigation } from "./MobileNavigation";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import { MobileNavigation } from "../MobileNavigation";
 import Image from "next/image";
 const navItems = [
   {
@@ -30,9 +29,15 @@ const Header = () => {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   return (
-    <header className="flex w-screen items-center justify-between bg-gray-200 p-4 md:px-16">
+    <header className="flex w-screen items-center justify-between bg-gray-50 p-4 shadow-sm md:px-16">
       <Link href={"/protected/home"}>
-        <Image src={"/paradia_1.png"} alt="PARADIA" height={100} width={150} />
+        <Image
+          src={"/header.png"}
+          alt="PARADIA"
+          height={100}
+          width={190}
+          className="mb-2"
+        />
       </Link>
       <div className="md:ox flex items-center gap-4">
         {isMobile ? (
@@ -50,8 +55,8 @@ const Header = () => {
                     "animate-fadeUp relative flex items-center rounded-md px-3 py-2 text-lg font-medium text-stone-700",
                     "before:absolute before:bottom-0 before:left-0 before:h-[2px] before:transition-all before:duration-300 before:ease-in-out",
                     isActive
-                      ? "text-sky-600 before:w-full before:bg-sky-500"
-                      : "before:w-0 before:bg-sky-500 hover:text-sky-600 hover:before:w-full",
+                      ? "text-orange-600 before:w-full before:bg-orange-500"
+                      : "before:w-0 before:bg-orange-500 hover:text-orange-600 hover:before:w-full",
                   )}
                 >
                   <Icon className="mr-2 h-5 w-5" />
@@ -61,7 +66,6 @@ const Header = () => {
             })}
           </nav>
         )}
-        <ThemeSwitcher />
       </div>
     </header>
   );
