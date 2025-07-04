@@ -6,7 +6,9 @@ export default async function Home() {
   return (
     <main className="flex flex-col items-center">
       <LpHeader />
-      <h2 className="text-4xl">Welcome to my Next.js app with Supabase!</h2>
+      <h2 className="text-4xl">
+        市民。もう誰も傷つかない、理想のSNSプラットフォーム、パラディアへようこそ。
+      </h2>
       <div className="mt-12 space-x-8">
         <Button asChild>
           <Link href="/auth/login">ログイン</Link>

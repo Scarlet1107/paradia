@@ -1,7 +1,7 @@
 {
-  "name": "Scarlet App",
-  "short_name": "Scarlet App",
-  "description": "A PWA for Scarlet",
+  "name": "Paradia",
+  "short_name": "Paradia",
+  "description": "Paradia（パラディア）は、すべての投稿がポジティブでなければならない世界を舞台にした、ディストピア風ソーシャルネットワークです。神聖なるAI『ORDINA』が市民の投稿を監視・修正し、秩序ある幸福を強制します。",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
