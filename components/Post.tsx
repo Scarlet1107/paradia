@@ -21,7 +21,7 @@ export default function Post({
   post: { id: string; content: string; createdAt: string };
 }) {
   const [likeCount, setLikeCount] = useState<number | null>(null);
-  const [setPrevCount] = useState<number>(0);
+  const [, setPrevCount] = useState<number>(0);
   const [direction, setDirection] = useState<"up" | "down">("up");
   const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(false);
