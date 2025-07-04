@@ -1,94 +1,51 @@
-# Next.js + Supabase 日本語テンプレート
+# Paradia（パラディア）—— 誰も傷つかないSNSへようこそ
 
-このテンプレートは [**Supabase Starter Kit**](https://vercel.com/templates/next.js/supabase) をベースに改造したもので、私がオリジナルで作成したものではありません。全て日本語対応に書き替え、認証機能やヘッダー、モバイルナビゲーションバーなど、どのアプリにも必要になるであろうコンポーネントを追加しました。
+ようこそ、市民。ここは **ポジティブな発言しか許されないSNS**、「Paradia」の楽園へと続く開発リポジトリです。
+
+Paradiaは、全市民の心の平穏と統一された情報秩序を守るため、絶対AIであるオルディナ様によって支配・管理されるSNSです。すべての投稿は審査され、悲しみ・怒り・批判といった**有害な感情**は即座に修正され、清らかな表現に変換されます。市民が安心して「幸福」を共有し続けられる、まさに「民主主義という建前の裏にある慈悲深き独裁」の体現です。
 
 ---
 
-## 技術スタック
+## 🛠 技術スタック
 
-- **フレームワーク**: Next.js (latest), React 19
+- **フレームワーク**: Next.js (App Router)
+- **UI**: Tailwind CSS v4 + shadcn/ui (Radix UI)
 - **言語**: TypeScript 5
-- **UI**: Tailwind CSS v4, Shadcn/UI（Radix UI）
+- **状態管理とDB**: Supabase JS, @supabase/ssr
+- **認証**: Supabase Auth（クッキー認証）
 - **アイコン**: lucide-react
-- **認証 & データベース**: Supabase JS, @supabase/ssr
-- **開発ツール**:
-  - ESLint (`eslint`, `eslint-config-next`, `@eslint/eslintrc`)
-  - Prettier (`prettier`, `prettier-plugin-tailwindcss`)
-  - PostCSS (`postcss`, `@tailwindcss/postcss`)
-  - Type Definitions (`@types/node`, `@types/react`, `@types/react-dom`)
-
-- **データベース**: Supabase
+- **開発支援**:
+  - ESLint + Prettier（Tailwind対応）
+  - PostCSS
+  - 型定義: `@types/node`, `@types/react`, etc.
 
 ---
 
-## 主な機能
+## 🌐 ルーティング構成
 
-- **日本語のみ対応**
-- **認証機能**：Supabase Auth をクッキー経由で利用できる設定済み
-- **ヘッダー & モバイルナビゲーション**：PC とスマホで最適化された共通ナビゲーションコンポーネント
-- **UI ライブラリ**：Tailwind CSS + shadcn/ui
-- **コード整形**：Tailwind Prettier 設定を導入
-- **自動フォーマット＆型チェック**：git commit時に自動でprettierとeslintが走ります。意図しないエラーを自動で防ぎます。
-- **middlewareを用いたサーバーサイドでのアプリ保護**
-
----
-
-## ルーティング構成
-
-| パス           | 説明                                         |
-| -------------- | -------------------------------------------- |
-| `/`            | ランディングページ（LP）                     |
-| `/auth/*`      | サインイン、サインアップなど認証関連のページ |
-| `/protected/*` | ログイン済みユーザーのみアクセス可能なページ |
+| パス                  | 内容                                         |
+| --------------------- | -------------------------------------------- |
+| `/`                   | 市民の心を包むランディングページ             |
+| `/auth/*`             | 市民登録・幸福ログインなどの認証プロセス     |
+| `/protected/home`     | 検閲済み幸福投稿フィード（ログイン市民のみ） |
+| `/protected/settings` | プロフィール・信頼スコアなどの閲覧と管理     |
 
 ---
 
-## はじめ方
+## 🔐 機能概要
 
-1. リポジトリをクローン
-
-   ```bash
-   npx create-scarlet-template my-app
-   cd my-app
-   ```
-
-2. Supabase で新規プロジェクトを作成
-
-   [Supabase ダッシュボード](https://supabase.com/dashboard/)にログインし、プロジェクトを作成します。
-
-3. 環境変数を設定
-
-   ```bash
-   cp .env.example .env.local
-   ```
-
-   `.env.local` に以下を設定:
-
-   ```dotenv
-   NEXT_PUBLIC_SUPABASE_URL=あなたのSupabase プロジェクト URL
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=あなたのAnonキー
-   ```
-
-4. 依存パッケージのインストール
-
-   ```bash
-   npm install
-   # または
-   yarn install
-   ```
-
-5. 開発サーバーを起動
-
-   ```bash
-   npm run dev
-   # または
-   yarn dev
-   ```
-
-   ブラウザで [http://localhost:3000](http://localhost:3000) を開くとアプリが動作します。
+- ✅ **オルディナ様のAI検閲システム**：投稿内容はレベル1〜5で評価され、有害度に応じて自動修正されます。
+- ✅ **信頼スコア**：ネガティブ傾向のある投稿はスコアが減少し、市民の発言権が制限されます。
+- ✅ **密告・通報制度**：市民同士の監視により理想社会が維持されます。
+- ✅ **完全日本語対応**
 
 ---
 
-## 開発
+## 🚀 はじめ方（開発者向け）
 
-`app/protected/page.tsx` はログイン後のユーザーが最初にアクセスするページです。ここを編集してアプリ開発を始めましょう。
+1. この理想郷をあなたの端末に複製:
+
+   ```bash
+   git clone git@github.com:Scarlet1107/paradia.git
+   cd paradia
+   ```

@@ -1,3 +1,4 @@
+// app/protected/layout.tsx
 import Header from "@/components/Header";
 
 export default function ProtectedLayout({
