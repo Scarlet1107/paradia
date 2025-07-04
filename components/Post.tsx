@@ -9,7 +9,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, Loader2 } from "lucide-react";
+import { Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const DOT_COUNT = 8;
@@ -20,9 +20,8 @@ export default function Post({
 }: {
   post: { id: string; content: string; createdAt: string };
 }) {
-  // likeCount が null → ロード中
   const [likeCount, setLikeCount] = useState<number | null>(null);
-  const [prevCount, setPrevCount] = useState<number>(0);
+  const [setPrevCount] = useState<number>(0);
   const [direction, setDirection] = useState<"up" | "down">("up");
   const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -61,15 +60,13 @@ export default function Post({
     const newState = !liked;
     const newCountValue = oldCount + (newState ? 1 : -1);
 
-    // アニメーション用に前後の数値と方向を保存
     setPrevCount(oldCount);
     setDirection(newCountValue > oldCount ? "up" : "down");
 
-    // UI先行更新
+    // Optimistically update UI
     setLiked(newState);
     setLikeCount(newCountValue);
 
-    // trigger explosion when liking
     if (newState) {
       setExplode(true);
       setTimeout(() => setExplode(false), 600);
@@ -80,7 +77,7 @@ export default function Post({
       credentials: "include",
     });
     if (!res.ok) {
-      // rollback on error
+      // Rollback on error
       setLiked(!newState);
       setLikeCount(oldCount);
     }
@@ -105,7 +102,15 @@ export default function Post({
 
       <CardFooter className="relative flex items-center justify-between">
         <time dateTime={post.createdAt} className="text-xs text-gray-500">
-          {new Date(post.createdAt).toLocaleString()}
+          {new Intl.DateTimeFormat("ja-JP", {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+            second: "numeric",
+            hour12: false,
+          }).format(new Date(post.createdAt))}
         </time>
 
         <Button
