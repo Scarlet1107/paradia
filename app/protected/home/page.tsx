@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Post from "@/components/Post";
 import PostComposer from "@/components/PostComposer";
+import TrustScoreValue from "@/components/TrustScoreValue";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -59,6 +60,7 @@ export default async function HomePage() {
         ),
       )}
       <PostComposer />
+      <TrustScoreValue />
     </div>
   );
 }
