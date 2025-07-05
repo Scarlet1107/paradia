@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { InfiniteList } from "@/components/InfiniteList";
 import Post from "@/components/Post";
 import PostComposer from "@/components/PostComposer";
@@ -26,6 +26,7 @@ interface PostWithLikes {
   id: string;
   content: string;
   created_at: string;
+  like_count?: number;
   likes?: { post_id: string; user_id: string }[];
 }
 
@@ -35,12 +36,29 @@ interface PostsInfiniteProps {
 }
 
 type SortOrder = "desc" | "asc" | "most_liked" | "least_liked";
+type TableName = "posts" | "posts_with_like_counts";
 
 export default function PostsInfinite({
   userId,
   pageSize = 10,
 }: PostsInfiniteProps): React.JSX.Element {
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const useLikesSort =
+    sortOrder === "most_liked" || sortOrder === "least_liked";
+  const tableName: TableName = useLikesSort
+    ? "posts_with_like_counts"
+    : "posts";
+  const columns = useLikesSort
+    ? "id, content, created_at, like_count, likes(post_id, user_id)"
+    : "id, content, created_at, likes(post_id, user_id)";
+  const sortColumn = useLikesSort ? "like_count" : "created_at";
+  const ascending = sortOrder === "asc" || sortOrder === "least_liked";
 
   const getSortLabel = () => {
     switch (sortOrder) {
@@ -72,11 +90,35 @@ export default function PostsInfinite({
     }
   };
 
+  // Don't render until client-side to avoid hydration mismatch
+  if (!isClient) {
+    return (
+      <div className="min-h-screen w-full">
+        <div className="flex w-full items-center justify-between border-b border-gray-200 bg-white p-4">
+          <div className="flex-1" />
+          <div className="h-10 w-32 animate-pulse rounded-lg bg-gray-200" />
+        </div>
+        <div className="w-full p-4">
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-32 w-full animate-pulse rounded-lg bg-gray-200"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      {/* ENHANCED SORT CONTROLS - Full width container */}
+    <div
+      className="min-h-screen w-full"
+      style={{ width: "100vw", maxWidth: "100%" }}
+    >
       <div className="flex w-full items-center justify-between bg-white p-4">
-        <div className="flex-1" /> {/* Spacer */}
+        <div className="flex-1" />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -166,45 +208,36 @@ export default function PostsInfinite({
         </DropdownMenu>
       </div>
 
-      {/* POSTS CONTAINER - Full width, consistent layout */}
-      <div className="flex w-full flex-1 flex-col">
-        {/* REMOUNT on sortOrder change so page 1 is re-fetched */}
-        <div className="w-full">
-          <InfiniteList<"posts">
-            key={sortOrder}
-            tableName="posts"
-            columns="id, content, created_at, likes(post_id, user_id)"
-            pageSize={pageSize}
-            trailingQuery={(q) =>
-              q.order("created_at", { ascending: sortOrder === "asc" })
-            }
-            renderItem={(post: PostWithLikes) => {
-              const likeCount = post.likes?.length ?? 0;
-              const initialLiked =
-                post.likes?.some((l) => l.user_id === userId) ?? false;
+      <div className="w-full" style={{ width: "100%", minWidth: "100%" }}>
+        <InfiniteList<TableName>
+          key={`${sortOrder}-${isClient}`}
+          tableName={tableName}
+          columns={columns}
+          pageSize={pageSize}
+          trailingQuery={(q) => q.order(sortColumn, { ascending })}
+          renderItem={(post: PostWithLikes) => {
+            const likeCount = useLikesSort
+              ? (post.like_count ?? 0)
+              : (post.likes?.length ?? 0);
+            const initialLiked =
+              post.likes?.some((l) => l.user_id === userId) ?? false;
 
-              return (
-                <div key={post.id} className="w-full">
-                  <Post
-                    post={{
-                      id: post.id,
-                      content: post.content,
-                      createdAt: post.created_at,
-                    }}
-                    initialLikeCount={likeCount}
-                    initialLiked={initialLiked}
-                  />
-                </div>
-              );
-            }}
-          />
-        </div>
-
-        {/* POST COMPOSER - Full width */}
-        <div className="w-full border-t border-gray-200 bg-white p-4">
-          <PostComposer />
-        </div>
+            return (
+              <Post
+                key={post.id}
+                post={{
+                  id: post.id,
+                  content: post.content,
+                  createdAt: post.created_at,
+                }}
+                initialLikeCount={likeCount}
+                initialLiked={initialLiked}
+              />
+            );
+          }}
+        />
       </div>
+      <PostComposer />
     </div>
   );
 }

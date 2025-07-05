@@ -206,5 +206,4 @@ export {
   type SupabaseTableData,
   type SupabaseTableName,
   type UseInfiniteQueryProps,
-  type SupabaseSelectBuilder,
 };
