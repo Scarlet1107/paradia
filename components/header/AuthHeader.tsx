@@ -9,7 +9,7 @@ const AuthHeader = () => {
         <Image
           src={"/header.png"}
           alt="PARADIA"
-          height={100}
+          height={40}
           width={190}
           className="mb-2"
         />
