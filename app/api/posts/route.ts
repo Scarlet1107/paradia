@@ -46,7 +46,7 @@ async function classifyAndRewrite(content: string): Promise<AIResult> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
-  } catch (e) {
+  } catch {
     throw new Error("AIレスポンスがJSON形式ではありません: " + raw);
   }
 
