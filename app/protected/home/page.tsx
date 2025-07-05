@@ -12,5 +12,9 @@ export default async function HomePage(): Promise<JSX.Element> {
   const userId = authData.user.id;
 
   // 2) render only the client infinite scroll
-  return <PostsInfinite userId={userId} />;
+  return (
+    <div className="min-h-screen w-full">
+      <PostsInfinite userId={userId} />
+    </div>
+  );
 }

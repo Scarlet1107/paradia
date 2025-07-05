@@ -1,6 +1,6 @@
+// components/InfiniteList.tsx
 "use client";
 
-import { cn } from "@/lib/utils";
 import {
   SupabaseQueryHandler,
   SupabaseTableData,
@@ -8,6 +8,7 @@ import {
   useInfiniteQuery,
 } from "@/hooks/use-infinite-query";
 import * as React from "react";
+import { Loader2 } from "lucide-react";
 
 interface InfiniteListProps<TableName extends SupabaseTableName> {
   tableName: TableName;
@@ -34,13 +35,13 @@ const DefaultEndMessage = () => (
   </div>
 );
 
-const defaultSkeleton = (count: number) => (
-  <div className="flex flex-col gap-2 px-4">
-    {Array.from({ length: count }).map((_, index) => (
-      <div key={index} className="bg-muted h-4 w-full animate-pulse" />
-    ))}
-  </div>
-);
+// const defaultSkeleton = (count: number) => (
+//     <div className="flex flex-col gap-2 px-4">
+//         {Array.from({ length: count }).map((_, index) => (
+//             <div key={index} className="bg-muted h-4 w-full" />
+//         ))}
+//     </div>
+// );
 
 export function InfiniteList<TableName extends SupabaseTableName>({
   tableName,
@@ -48,10 +49,9 @@ export function InfiniteList<TableName extends SupabaseTableName>({
   pageSize = 20,
   trailingQuery,
   renderItem,
-  className,
   renderNoResults = DefaultNoResults,
   renderEndMessage = DefaultEndMessage,
-  renderSkeleton = defaultSkeleton,
+  // renderSkeleton = defaultSkeleton,
 }: InfiniteListProps<TableName>) {
   const { data, isFetching, hasMore, fetchNextPage, isSuccess } =
     useInfiniteQuery({
@@ -61,54 +61,42 @@ export function InfiniteList<TableName extends SupabaseTableName>({
       trailingQuery,
     });
 
-  // Ref for the scrolling container
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
-
-  // Intersection observer logic - target the last rendered *item* or a dedicated sentinel
-  const loadMoreSentinelRef = React.useRef<HTMLDivElement>(null);
-  const observer = React.useRef<IntersectionObserver | null>(null);
+  // We no longer need a custom scroll container for IntersectionObserver:
+  const sentinelRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (observer.current) observer.current.disconnect();
-
-    observer.current = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isFetching) {
           fetchNextPage();
         }
       },
       {
-        root: scrollContainerRef.current, // Use the scroll container for scroll detection
-        threshold: 0.1, // Trigger when 10% of the target is visible
-        rootMargin: "0px 0px 100px 0px", // Trigger loading a bit before reaching the end
+        root: null, // ← use viewport
+        threshold: 0.1,
+        rootMargin: "0px 0px 100px 0px",
       },
     );
-
-    if (loadMoreSentinelRef.current) {
-      observer.current.observe(loadMoreSentinelRef.current);
-    }
-
-    return () => {
-      if (observer.current) observer.current.disconnect();
-    };
+    if (sentinelRef.current) observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
   }, [isFetching, hasMore, fetchNextPage]);
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className={cn("relative h-full overflow-auto", className)}
-    >
-      <div>
-        {isSuccess && data.length === 0 && renderNoResults()}
+    <div className="relative flex h-full w-full min-w-0 flex-1 flex-col gap-4 p-4">
+      {isSuccess && data.length === 0 && renderNoResults()}
 
-        {data.map((item, index) => renderItem(item, index))}
+      {data.map((item, index) => renderItem(item, index))}
 
-        {isFetching && renderSkeleton && renderSkeleton(pageSize)}
+      {isFetching && (
+        <div className="flex justify-center py-4">
+          <Loader2 className="text-muted-foreground h-5 w-5 animate-spin" />
+        </div>
+      )}
 
-        <div ref={loadMoreSentinelRef} style={{ height: "1px" }} />
+      {/* Placed at the end of the list */}
+      <div ref={sentinelRef} style={{ height: "1px" }} />
 
-        {!hasMore && data.length > 0 && renderEndMessage()}
-      </div>
+      {!hasMore && data.length > 0 && renderEndMessage()}
     </div>
   );
 }
