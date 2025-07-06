@@ -6,13 +6,11 @@ import Image from "next/image";
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 
@@ -44,15 +42,13 @@ const DeleteUserDialog = () => {
     }
   };
 
-  const onCancel = () => {
-    // キャンセルボタンは表示のみ（実際には削除が必須）
-    toast("削除は必須です");
-  };
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-red-50">
       <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogContent className="max-w-md">
+        <AlertDialogContent
+          className="max-w-md"
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
           <AlertDialogHeader>
             <div className="mx-auto mb-4 flex h-32 w-32 items-center justify-center rounded-full bg-red-100">
               <Image
