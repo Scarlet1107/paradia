@@ -16,7 +16,7 @@ const navItems = [
   {
     href: "/protected/announcements",
     icon: Megaphone,
-    label: "アナウンス",
+    label: "お知らせ",
   },
   {
     href: "/protected/settings",
