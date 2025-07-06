@@ -53,15 +53,13 @@ export async function updateSession(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
-    // trust_scoreが0以下の場合、delete_userページにリダイレクト
-    console.log("ユーザーの信頼スコア:", userData?.trust_score, date); // サーバーログに出力
+    // trust_scoreが0以下の場合、delete_userページにリダイレクト// サーバーログに出力
     if (
       !request.nextUrl.pathname.startsWith("/protected/delete-user") &&
       !error &&
       userData &&
       userData.trust_score <= 0
     ) {
-      console.log("この市民の信頼度は0以下です。ただちに粛清します");
       url.pathname = "/protected/delete-user";
       return NextResponse.redirect(url);
     }

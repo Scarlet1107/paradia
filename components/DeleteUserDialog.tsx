@@ -7,7 +7,7 @@ import Image from "next/image";
 const DeleteUserDialog = () => {
   const router = useRouter();
   const onDelete = async () => {
-    const resp = await fetch("/profile/delete", {
+    const resp = await fetch("/api/profile/delete", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });

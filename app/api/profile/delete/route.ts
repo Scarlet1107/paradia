@@ -16,6 +16,7 @@ export async function DELETE() {
   const userId = user.id;
 
   // RLS バイパスして削除
+  await authClient.from("likes").delete().eq("user_id", userId);
   await authClient.from("profiles").delete().eq("id", userId);
   const { error: deleteError } =
     await supabaseAdmin.auth.admin.deleteUser(userId);
