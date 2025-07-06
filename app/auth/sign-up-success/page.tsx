@@ -18,7 +18,7 @@ export default function Page() {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground mb-2 text-sm">
-            登録が完了しました。サインインする前に、
+            登録が完了しました。ログインする前に、
             アカウント確認のためメールをご確認ください。
           </p>
           <p className="text-muted-foreground mb-4 text-xs">
@@ -28,7 +28,7 @@ export default function Page() {
             href="/auth/login"
             className="inline-block font-medium text-blue-500 underline decoration-blue-500 underline-offset-2"
           >
-            サインイン画面へ
+            ログイン画面へ
           </a>
         </CardContent>
       </Card>

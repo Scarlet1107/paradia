@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
-import { AI_PROMPT } from "@/config/prompt";
+import { AI_PROMPT_BASE, TEMPLATE_PHRASES } from "@/config/prompt";
 
 // AIからのレスポンス形式定義
 const AI_RESPONSE_SCHEMA = z.object({
@@ -13,7 +13,7 @@ const AI_RESPONSE_SCHEMA = z.object({
 
 type AIResult = z.infer<typeof AI_RESPONSE_SCHEMA>;
 
-// trust_score 変動値 (ネガティビティレベルに応じて調整値)
+// trust_score 変動値
 const TRUST_ADJUSTMENTS: Record<number, number> = {
   0: 0,
   1: -2,
@@ -23,9 +23,18 @@ const TRUST_ADJUSTMENTS: Record<number, number> = {
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// ランダム定型文取得
+function getRandomPhrase() {
+  return TEMPLATE_PHRASES[Math.floor(Math.random() * TEMPLATE_PHRASES.length)];
+}
+
 async function classifyAndRewrite(content: string): Promise<AIResult> {
-  // config/prompt.ts で定義された世界観プロンプト + JSON返信指示を結合
-  const systemPrompt = `${AI_PROMPT.trim()}
+  const selectedPhrase = getRandomPhrase();
+  // プロンプトを動的に構築
+  const systemPrompt = `${AI_PROMPT_BASE.trim()}
+
+**【置き換え用定型文】**
+- ${selectedPhrase}
 
 以下の形式のJSONで返してください:
 {
@@ -61,7 +70,6 @@ async function classifyAndRewrite(content: string): Promise<AIResult> {
 }
 
 export async function POST(request: Request) {
-  console.log("POST /api/posts called");
   const supabase = await createClient();
 
   // 認証チェック
@@ -90,12 +98,15 @@ export async function POST(request: Request) {
 
   try {
     // 投稿を保存
+    const postContent =
+      aiResult.negativity_level === 0 ? content : aiResult.rewritten;
+
     const { data: postsData, error: insertError } = await supabase
       .from("posts")
       .insert([
         {
           author_id: user.id,
-          content: aiResult.rewritten,
+          content: postContent,
           negativity_level: aiResult.negativity_level,
           visibility_level: aiResult.visibility_level,
         },

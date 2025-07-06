@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 
 export default function PostComposer() {
   const [open, setOpen] = useState(false);
@@ -31,6 +32,17 @@ export default function PostComposer() {
       });
 
       const json = await res.json().catch(() => null);
+      if (json.negativity_level == 1) {
+        toast.error("異常な文言パターンを検出しました。信頼度が減少しました。");
+      } else if (json.negativity_level == 2) {
+        toast.error(
+          "警告：不適切な文章が検出されました。信頼度が減少しました。",
+        );
+      } else if (json.negativity_level == 3) {
+        toast.error(
+          "重大警告：悪意のある投稿が検出されました。信頼度が減少しました。",
+        );
+      }
 
       if (!res.ok) {
         console.error("投稿失敗:", json ?? res.statusText);
