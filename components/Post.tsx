@@ -1,7 +1,7 @@
-// File: components/Post.tsx
+// components/Post.tsx
 "use client";
-
 import { useState } from "react";
+import { toast } from "sonner";
 import {
   Card,
   CardHeader,
@@ -15,7 +15,6 @@ import { motion, AnimatePresence } from "framer-motion";
 const DOT_COUNT = 8;
 const RADIUS = 24; // px
 
-// 👑 Props now include initialLikeCount & initialLiked
 interface PostProps {
   post: { id: string; content: string; createdAt: string };
   initialLikeCount: number;
@@ -51,6 +50,16 @@ export default function Post({
       method: newState ? "POST" : "DELETE",
       credentials: "include",
     });
+
+    const json = await res.json().catch(() => ({}));
+
+    if (json.selfLike) {
+      setLiked(false);
+      setLikeCount((c) => c - delta);
+      toast.error("自分の投稿にはいいねできません！信頼度が1減少しました。");
+      setLoading(false);
+      return;
+    }
 
     if (!res.ok) {
       setLiked(!newState);
@@ -126,7 +135,6 @@ export default function Post({
             </AnimatePresence>
           </motion.div>
 
-          {/* Sliding Count Animation */}
           <AnimatePresence initial={false} mode="popLayout">
             <motion.span
               key={likeCount}

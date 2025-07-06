@@ -20,24 +20,35 @@ export async function POST(
     .eq("id", postId)
     .single();
   if (!postErr && post?.author_id) {
-    await supabase
-      .from("profiles")
-      .update({
-        trust_score: Math.min(
-          100,
-          ((
-            post.author_id &&
-            (await supabase
-              .from("profiles")
-              .select("trust_score")
-              .eq("id", post.author_id)
-              .single())
-          ).data?.trust_score ?? 0) + 1,
-        ),
-      })
-      .eq("id", post.author_id);
+    if (post.author_id === user.id) {
+      // self-like penalty: decrement own trust_score by 1 (min 0)
+      const { data: prof, error: profErr } = await supabase
+        .from("profiles")
+        .select("trust_score")
+        .eq("id", user.id)
+        .single();
+      if (!profErr && prof?.trust_score != null) {
+        await supabase
+          .from("profiles")
+          .update({ trust_score: Math.max(0, prof.trust_score - 1) })
+          .eq("id", user.id);
+      }
+      return NextResponse.json({ success: true, selfLike: true });
+    } else {
+      // normal like: bump author’s trust_score by +1 (max 100)
+      const { data: prof, error: profErr } = await supabase
+        .from("profiles")
+        .select("trust_score")
+        .eq("id", post.author_id)
+        .single();
+      if (!profErr && prof?.trust_score != null) {
+        await supabase
+          .from("profiles")
+          .update({ trust_score: Math.min(100, prof.trust_score + 1) })
+          .eq("id", post.author_id);
+      }
+    }
   }
-  return NextResponse.json({ success: true });
 }
 
 export async function DELETE(
