@@ -13,14 +13,15 @@ export default async function NewsPage() {
     .limit(10);
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="mb-24 flex flex-col gap-10">
       {/* ORDINA様公式アナウンスメント */}
       <section className="space-y-4">
         <h1 className="text-center text-4xl font-extrabold text-orange-500 drop-shadow-md">
           オルディナ様からのお知らせ
         </h1>
-        <div className="grid auto-cols-fr auto-rows-[100px] grid-cols-5 grid-rows-3 gap-4">
-          <Card className="col-span-2 row-span-2 bg-orange-100">
+        <div className="grid grid-cols-1 gap-4 md:auto-cols-fr md:auto-rows-[100px] md:grid-cols-5 md:grid-rows-3">
+          {/* カード1: モバイルでも表示 */}
+          <Card className="block bg-orange-100 md:col-span-2 md:row-span-2">
             <CardContent className="p-6 text-lg">
               <strong className="text-xl">先月比 幸福指数 +5%</strong>
               <p className="mt-1 text-base">
@@ -29,7 +30,8 @@ export default async function NewsPage() {
               </p>
             </CardContent>
           </Card>
-          <Card className="col-span-3 row-span-1 bg-orange-100">
+          {/* カード2: モバイルでも表示 */}
+          <Card className="block bg-orange-100 md:col-span-3 md:row-span-1">
             <CardContent className="p-4 text-base">
               <strong className="text-xl">今月の違反者報告</strong>
               <p className="mt-1 text-base">
@@ -38,7 +40,8 @@ export default async function NewsPage() {
               </p>
             </CardContent>
           </Card>
-          <Card className="col-span-3 row-span-3 bg-orange-300">
+          {/* カード3: モバイルでは非表示 */}
+          <Card className="hidden bg-orange-300 md:col-span-3 md:row-span-3 md:block">
             <CardContent className="p-6 text-lg">
               <h2 className="text-xl font-bold">
                 季節キャンペーン：真夏の大調和
@@ -50,7 +53,8 @@ export default async function NewsPage() {
               </p>
             </CardContent>
           </Card>
-          <Card className="col-span-2 row-span-2 bg-orange-200">
+          {/* カード4: モバイルでは非表示 */}
+          <Card className="hidden bg-orange-200 md:col-span-2 md:row-span-2 md:block">
             <CardContent className="p-6 text-lg">
               <strong className="text-xl">投稿ルールの見直し</strong>
               <p className="mt-1 text-base">
