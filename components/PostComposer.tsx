@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 
 export default function PostComposer() {
   const [open, setOpen] = useState(false);
@@ -31,6 +32,17 @@ export default function PostComposer() {
       });
 
       const json = await res.json().catch(() => null);
+      if (json.negativity_level == 1) {
+        toast.error("異常な文言パターンを検出しました。信頼度が減少しました。");
+      } else if (json.negativity_level == 2) {
+        toast.error(
+          "警告：不適切な文章が検出されました。信頼度が減少しました。",
+        );
+      } else if (json.negativity_level == 3) {
+        toast.error(
+          "重大警告：悪意のある投稿が検出されました。信頼度が減少しました。",
+        );
+      }
 
       if (!res.ok) {
         console.error("投稿失敗:", json ?? res.statusText);
@@ -50,12 +62,17 @@ export default function PostComposer() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="fixed right-5 bottom-5 rounded-full bg-orange-500 p-4 text-white shadow-lg transition hover:bg-orange-600">
-          <Plus size={24} />
-        </Button>
+      {/* なぜかPlusのサイズが調整できない */}
+      {/* Nodeとかの開発環境の問題かも - shogo */}
+      <DialogTrigger
+        asChild
+        className="fixed right-5 bottom-20 h-14 w-14 cursor-pointer md:right-12 md:bottom-12 md:h-20 md:w-20"
+      >
+        <Plus
+          size={24}
+          className="hover:bg-orange-600g h-14 w-14 items-center justify-center rounded-full bg-orange-500 text-white shadow-lg transition md:h-14 md:w-14"
+        />
       </DialogTrigger>
-
       <DialogContent className="rounded-2xl bg-gray-50 p-6 shadow-2xl">
         <DialogTitle className="text-xl font-semibold text-blue-700">
           新しいポスト
