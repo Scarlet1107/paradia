@@ -2,11 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Image from "next/image";
 
 const DeleteUserDialog = () => {
   const router = useRouter();
   const onDelete = async () => {
-    const resp = await fetch("/api/delete-user", {
+    const resp = await fetch("/profile/delete", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });
@@ -23,20 +24,14 @@ const DeleteUserDialog = () => {
     <div className="flex min-h-screen items-center justify-center bg-red-50">
       <div className="w-full max-w-md rounded-lg bg-white p-8 text-center shadow-lg">
         <div className="mb-6">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-            <svg
-              className="h-8 w-8 text-red-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z"
-              />
-            </svg>
+          <div className="mx-auto mb-4 flex h-32 w-32 items-center justify-center rounded-full">
+            <Image
+              src="/angry_eye.png" // publicフォルダ内の画像
+              alt="怒った顔"
+              width={128}
+              height={128}
+              className="text-red-600"
+            />
           </div>
           <h1 className="mb-2 text-2xl font-bold text-red-600">
             アカウント削除通知
