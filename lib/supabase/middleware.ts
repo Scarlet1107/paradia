@@ -5,7 +5,6 @@ export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
-
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -46,9 +45,36 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
   // ログインしている場合、protectedページ以外を許可しない
-  else if (user && !request.nextUrl.pathname.startsWith("/protected")) {
-    url.pathname = "/protected/home";
-    return NextResponse.redirect(url);
+  else if (user) {
+    const date = new Date();
+    const { data: userData, error } = await supabase
+      .from("profiles")
+      .select("trust_score")
+      .eq("id", user.id)
+      .single();
+
+    // trust_scoreが0以下の場合、delete_userページにリダイレクト
+    console.log("ユーザーの信頼スコア:", userData?.trust_score, date); // サーバーログに出力
+    if (
+      !request.nextUrl.pathname.startsWith("/protected/delete-user") &&
+      !error &&
+      userData &&
+      userData.trust_score <= 0
+    ) {
+      console.log("この市民の信頼度は0以下です。ただちに粛清します");
+      url.pathname = "/protected/delete-user";
+      return NextResponse.redirect(url);
+    }
+    // trust_scoreが1以上かつ、delete_userにアクセスした場合/protected/homeに戻す
+    else if (
+      !request.nextUrl.pathname.startsWith("/protected") ||
+      (userData &&
+        userData.trust_score >= 1 &&
+        request.nextUrl.pathname.startsWith("/protected/delete-user"))
+    ) {
+      url.pathname = "/protected/home";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;

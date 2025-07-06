@@ -1,7 +1,7 @@
 // app/protected/layout.tsx
 import Header from "@/components/Header";
 
-export default function ProtectedLayout({
+export default async function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
