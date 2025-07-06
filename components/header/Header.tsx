@@ -29,7 +29,7 @@ const Header = () => {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   return (
-    <header className="sticky top-0 z-10 flex w-screen items-center justify-between bg-gray-50 p-4 shadow-sm md:px-16">
+    <header className="sticky top-0 z-20 flex w-screen items-center justify-between bg-gray-50 p-4 shadow-sm md:px-16">
       <Link href={"/protected/home"}>
         <Image
           src={"/header.png"}
