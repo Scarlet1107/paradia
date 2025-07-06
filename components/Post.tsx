@@ -61,7 +61,6 @@ export default function Post({
       setLiked(!newState);
       setLikeCount((c) => c - delta);
     } else {
-      // Notify parent component for real-time updates
       onLikeUpdate?.(likeCount + delta, newState);
     }
 
@@ -88,12 +87,9 @@ export default function Post({
   return (
     <div className="overflow-hidden rounded-2xl border border-orange-500 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
       <div className="flex">
-        {/* Left Avatar Section - Responsive two-tone design with profile on border */}
         <div className="relative flex min-h-[120px] w-24 flex-shrink-0 flex-col sm:min-h-[140px] sm:w-32 md:min-h-[160px] md:w-40">
-          {/* Top section - Orange (responsive ratio) */}
           <div className="h-8 bg-gradient-to-br from-orange-400 to-orange-500 sm:h-12 md:h-16"></div>
 
-          {/* Bottom section - Light cream/pink (responsive ratio) */}
           <div className="flex flex-1 flex-col items-center justify-end bg-gradient-to-br from-orange-100 to-pink-50 pt-4 pb-2 sm:pt-6 sm:pb-3 md:pt-8">
             <div className="px-1 text-center">
               <div className="mb-0.5 text-[10px] leading-tight font-bold text-orange-600 sm:mb-1 sm:text-xs md:text-sm">
@@ -105,10 +101,8 @@ export default function Post({
             </div>
           </div>
 
-          {/* Profile picture positioned on the border - responsive sizing */}
           <div className="absolute top-2 left-1/2 z-0 -translate-x-1/2 transform sm:top-4 md:top-6">
             <div className="relative">
-              {/* Full circular profile picture with proper fill */}
               <div className="h-8 w-8 overflow-hidden rounded-full border-2 border-white shadow-lg sm:h-12 sm:w-12 md:h-16 md:w-16">
                 <Image
                   src="/user_icon.png"
@@ -119,7 +113,6 @@ export default function Post({
                   style={{ objectPosition: "center" }}
                 />
               </div>
-              {/* Badge/Shield Icon - responsive sizing */}
               <div className="absolute -right-0.5 -bottom-0 h-3 w-3 sm:-right-1 sm:-bottom-0 sm:h-4 sm:w-4 md:-right-1 md:-bottom-0 md:h-5 md:w-5">
                 <Image
                   src="/2.png"
@@ -133,28 +126,20 @@ export default function Post({
           </div>
         </div>
 
-        {/* Vertical separator */}
         <div className="w-px flex-shrink-0 bg-orange-500"></div>
 
-        {/* Main Content Section - responsive spacing */}
         <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4 md:p-6">
-          {/* Post Content */}
           <div className="mb-3 flex-1 sm:mb-4">
             <p className="text-xs leading-relaxed break-words text-gray-800 sm:text-sm md:text-base">
               {post.content}
             </p>
           </div>
 
-          {/* Bottom Section with Timestamp and Actions - responsive spacing */}
           <div className="flex items-center justify-between gap-2 sm:gap-3">
-            {/* Timestamp */}
             <time className="flex-shrink-0 text-[10px] font-medium text-orange-500 sm:text-xs md:text-sm">
               {formatDate(post.createdAt)}
             </time>
-
-            {/* Action Buttons - responsive spacing and sizing */}
             <div className="flex flex-shrink-0 items-center gap-1 sm:gap-2 md:gap-3">
-              {/* User X Button */}
               <Button
                 variant="ghost"
                 size="sm"
@@ -166,7 +151,6 @@ export default function Post({
                 </span>
               </Button>
 
-              {/* Like Button - responsive sizing */}
               <Button
                 variant="ghost"
                 onClick={handleLike}
