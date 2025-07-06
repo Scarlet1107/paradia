@@ -1,9 +1,64 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
+import { z } from "zod";
 import { AI_PROMPT } from "@/config/prompt";
 
+// AIからのレスポンス形式定義
+const AI_RESPONSE_SCHEMA = z.object({
+  rewritten: z.string(),
+  negativity_level: z.number().int().min(0).max(3),
+  visibility_level: z.number().int().min(1).max(5),
+});
+
+type AIResult = z.infer<typeof AI_RESPONSE_SCHEMA>;
+
+// trust_score 変動値 (ネガティビティレベルに応じて調整値)
+const TRUST_ADJUSTMENTS: Record<number, number> = {
+  0: 0,
+  1: -2,
+  2: -5,
+  3: -10,
+};
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+async function classifyAndRewrite(content: string): Promise<AIResult> {
+  // config/prompt.ts で定義された世界観プロンプト + JSON返信指示を結合
+  const systemPrompt = `${AI_PROMPT.trim()}
+
+以下の形式のJSONで返してください:
+{
+  "rewritten": "書き換え後のテキスト",
+  "negativity_level": 0,
+  "visibility_level": 1
+}`;
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content },
+    ],
+  });
+
+  const raw = completion.choices?.[0]?.message?.content ?? "";
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error("AIレスポンスがJSON形式ではありません: " + raw);
+  }
+
+  const result = AI_RESPONSE_SCHEMA.safeParse(parsed);
+  if (!result.success) {
+    throw new Error(
+      "AIレスポンスのバリデーションエラー: " +
+        JSON.stringify(result.error.format()),
+    );
+  }
+  return result.data;
+}
 
 export async function POST(request: Request) {
   console.log("POST /api/posts called");
@@ -17,57 +72,88 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "認証エラー" }, { status: 401 });
   }
 
-  // リクエストボディ取得
   const { content } = await request.json();
   console.log("Received content:", content);
 
-  // ORDINA によるリライト
-  let rewritten: string;
+  // AIでリライト＆分類
+  let aiResult: AIResult;
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: AI_PROMPT },
-        { role: "user", content },
-      ],
-    });
-    rewritten = completion.choices?.[0]?.message?.content ?? "";
-    console.log("Rewritten content:", rewritten);
+    aiResult = await classifyAndRewrite(content);
+    console.log("AI Result:", aiResult);
   } catch (e) {
-    console.error("リライト失敗:", e);
-    return NextResponse.json({ error: "リライト失敗" }, { status: 500 });
+    console.error("AI分類リライト失敗:", e);
+    return NextResponse.json({ error: "AI分類リライト失敗" }, { status: 500 });
   }
 
-  // DB に保存 (returning を利用)
+  // trust_score 調整値
+  const adjust = TRUST_ADJUSTMENTS[aiResult.negativity_level] ?? 0;
+
   try {
-    const { data, error: insertError } = await supabase
+    // 投稿を保存
+    const { data: postsData, error: insertError } = await supabase
       .from("posts")
-      .insert([{ content: rewritten }])
-      .select(); // Ensures data is typed as an array of rows
+      .insert([
+        {
+          author_id: user.id,
+          content: aiResult.rewritten,
+          negativity_level: aiResult.negativity_level,
+          visibility_level: aiResult.visibility_level,
+        },
+      ])
+      .select();
 
     if (insertError) {
-      console.error("ポストの保存に失敗しました:", insertError);
+      console.error("ポスト保存失敗:", insertError);
       return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
-
-    if (!data || data.length === 0) {
-      console.error("挿入後のデータが取得できませんでした");
+    if (!postsData || postsData.length === 0) {
+      console.error("挿入後データ取得失敗");
       return NextResponse.json(
         { error: "挿入後データ取得失敗" },
         { status: 500 },
       );
     }
+    const savedPost = postsData[0];
 
-    const saved = data[0];
-    console.log("Inserted:", saved);
-    return NextResponse.json(saved, { status: 201 });
+    // trust_score 更新
+    if (adjust !== 0) {
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("trust_score")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !profileData) {
+        console.error("信頼度取得失敗:", profileError);
+        return NextResponse.json(
+          { post: savedPost, warning: "信頼度取得失敗" },
+          { status: 201 },
+        );
+      }
+
+      const newScore = profileData.trust_score + adjust;
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ trust_score: newScore })
+        .eq("id", user.id);
+
+      if (updateError) {
+        console.error("信頼度更新失敗:", updateError);
+        return NextResponse.json(
+          { post: savedPost, warning: "信頼度更新失敗" },
+          { status: 201 },
+        );
+      }
+    }
+
+    return NextResponse.json(savedPost, { status: 201 });
   } catch (e) {
-    console.error("予期せぬエラー:", e);
+    console.error("サーバーエラー:", e);
     return NextResponse.json({ error: "サーバーエラー" }, { status: 500 });
   }
 }
 
-// CORS オプション対応（必要であれば）
+// CORS対応
 export async function OPTIONS() {
   return NextResponse.json(
     {},

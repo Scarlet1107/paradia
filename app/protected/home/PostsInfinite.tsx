@@ -7,6 +7,7 @@ import Post from "@/components/Post";
 import PostComposer from "@/components/PostComposer";
 import SearchSortHeader from "@/components/SearchSortHeader";
 import type { SupabaseSelectBuilder } from "@/hooks/use-infinite-query";
+import TrustScoreValue from "@/components/TrustScoreValue";
 
 interface PostWithLikes {
   id: string;
@@ -116,6 +117,7 @@ export default function PostsInfinite({
         />
       </div>
       <PostComposer />
+      <TrustScoreValue />
     </div>
   );
 }
