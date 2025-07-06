@@ -1,7 +1,7 @@
 // File: components/Post.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Card,
   CardHeader,
@@ -15,57 +15,32 @@ import { motion, AnimatePresence } from "framer-motion";
 const DOT_COUNT = 8;
 const RADIUS = 24; // px
 
+// 👑 Props now include initialLikeCount & initialLiked
+interface PostProps {
+  post: { id: string; content: string; createdAt: string };
+  initialLikeCount: number;
+  initialLiked: boolean;
+}
+
 export default function Post({
   post,
-}: {
-  post: { id: string; content: string; createdAt: string };
-}) {
-  const [likeCount, setLikeCount] = useState<number | null>(null);
-  const [, setPrevCount] = useState<number>(0);
-  const [direction, setDirection] = useState<"up" | "down">("up");
-  const [liked, setLiked] = useState(false);
+  initialLikeCount,
+  initialLiked,
+}: PostProps) {
+  const [likeCount, setLikeCount] = useState(initialLikeCount);
+  const [liked, setLiked] = useState(initialLiked);
   const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
   const [explode, setExplode] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchLikes() {
-      try {
-        const res = await fetch(`/api/posts/${post.id}/like`);
-        if (!res.ok) throw new Error("Fetch failed");
-        const { count, liked } = await res.json();
-        if (!isMounted) return;
-        setPrevCount(count);
-        setLikeCount(count);
-        setDirection("up");
-        setLiked(liked);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        if (isMounted) setInitialLoading(false);
-      }
-    }
-    fetchLikes();
-    return () => {
-      isMounted = false;
-    };
-  }, [post.id]);
-
   const handleLike = async () => {
-    if (loading || initialLoading) return;
+    if (loading) return;
     setLoading(true);
 
-    const oldCount = likeCount ?? 0;
     const newState = !liked;
-    const newCountValue = oldCount + (newState ? 1 : -1);
+    const delta = newState ? 1 : -1;
 
-    setPrevCount(oldCount);
-    setDirection(newCountValue > oldCount ? "up" : "down");
-
-    // Optimistically update UI
     setLiked(newState);
-    setLikeCount(newCountValue);
+    setLikeCount((c) => c + delta);
 
     if (newState) {
       setExplode(true);
@@ -76,18 +51,18 @@ export default function Post({
       method: newState ? "POST" : "DELETE",
       credentials: "include",
     });
+
     if (!res.ok) {
-      // Rollback on error
       setLiked(!newState);
-      setLikeCount(oldCount);
+      setLikeCount((c) => c - delta);
     }
+
     setLoading(false);
   };
 
-  // generate DOT_COUNT angles evenly
   const dots = Array.from({ length: DOT_COUNT }, (_, i) => {
     const angle = (2 * Math.PI * i) / DOT_COUNT;
-    return { angle };
+    return { angle, idx: i };
   });
 
   return (
@@ -100,7 +75,7 @@ export default function Post({
         <p>{post.content}</p>
       </CardContent>
 
-      <CardFooter className="relative flex items-center justify-between">
+      <CardFooter className="relative flex items-center justify-between overflow-visible">
         <time dateTime={post.createdAt} className="text-xs text-gray-500">
           {new Intl.DateTimeFormat("ja-JP", {
             year: "numeric",
@@ -116,7 +91,7 @@ export default function Post({
         <Button
           variant="ghost"
           onClick={handleLike}
-          disabled={loading || initialLoading}
+          disabled={loading}
           className="relative flex items-center space-x-1 overflow-visible"
         >
           <motion.div
@@ -131,12 +106,11 @@ export default function Post({
                 liked ? "fill-current text-red-500" : "text-gray-400"
               }`}
             />
-            {/* Explosion Dots */}
             <AnimatePresence>
               {explode &&
-                dots.map((dot, idx) => {
-                  const x = Math.cos(dot.angle) * RADIUS;
-                  const y = Math.sin(dot.angle) * RADIUS;
+                dots.map(({ angle, idx }) => {
+                  const x = Math.cos(angle) * RADIUS;
+                  const y = Math.sin(angle) * RADIUS;
                   const color = idx % 2 === 0 ? "bg-orange-400" : "bg-cyan-400";
                   return (
                     <motion.span
@@ -152,22 +126,19 @@ export default function Post({
             </AnimatePresence>
           </motion.div>
 
-          {initialLoading ? (
-            <span className="animate-pulse text-sm text-gray-400">…</span>
-          ) : (
-            <AnimatePresence initial={false} mode="popLayout">
-              <motion.span
-                key={likeCount}
-                initial={{ y: direction === "up" ? 10 : -10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: direction === "up" ? -10 : 10, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="text-sm"
-              >
-                {likeCount}
-              </motion.span>
-            </AnimatePresence>
-          )}
+          {/* Sliding Count Animation */}
+          <AnimatePresence initial={false} mode="popLayout">
+            <motion.span
+              key={likeCount}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="text-sm"
+            >
+              {likeCount}
+            </motion.span>
+          </AnimatePresence>
         </Button>
       </CardFooter>
     </Card>

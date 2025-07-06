@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import { Home as HomeIcon, Settings } from "lucide-react";
+import { Home as HomeIcon, Megaphone, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -14,9 +14,9 @@ const navItems = [
     label: "ホーム",
   },
   {
-    href: "/protected/home2",
-    icon: HomeIcon,
-    label: "2",
+    href: "/protected/announcements",
+    icon: Megaphone,
+    label: "お知らせ",
   },
   {
     href: "/protected/settings",
@@ -29,12 +29,12 @@ const Header = () => {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   return (
-    <header className="flex w-screen items-center justify-between bg-gray-50 p-4 shadow-sm md:px-16">
+    <header className="sticky top-0 z-10 flex w-screen items-center justify-between bg-gray-50 p-4 shadow-sm md:px-16">
       <Link href={"/protected/home"}>
         <Image
           src={"/header.png"}
           alt="PARADIA"
-          height={100}
+          height={40}
           width={190}
           className="mb-2"
         />
@@ -52,7 +52,7 @@ const Header = () => {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "animate-fadeUp relative flex items-center rounded-md px-3 py-2 text-lg font-medium text-stone-700",
+                    "relative flex items-center rounded-md px-3 py-2 text-lg font-medium text-stone-700",
                     "before:absolute before:bottom-0 before:left-0 before:h-[2px] before:transition-all before:duration-300 before:ease-in-out",
                     isActive
                       ? "text-orange-600 before:w-full before:bg-orange-500"
