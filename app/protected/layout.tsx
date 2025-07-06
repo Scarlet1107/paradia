@@ -1,5 +1,5 @@
 // app/protected/layout.tsx
-import Header from "@/components/Header";
+import Header from "@/components/header/Header";
 
 export default async function ProtectedLayout({
   children,

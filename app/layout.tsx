@@ -1,9 +1,9 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import DynamicBackground from "@/components/dynamicBackground";
 
 const defaultUrl = process.env.NEXT_PUBLIC_BASE_URL
   ? `${process.env.NEXT_PUBLIC_BASE_URL}`
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: `${defaultUrl}/paradia_1.png`,
+        url: `${defaultUrl}/open_graph.png`,
         width: 1200,
         height: 630,
         alt: "Paradiaのバナー画像",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     title: "Paradia - すべてがポジティブに包まれたSNS",
     description:
       "Paradiaは、市民が安心して前向きな思いを共有できる、秩序と調和のもとに運営される新時代のSNS",
-    images: ["/paradia_1.png"],
+    images: ["/header.png"],
   },
 };
 
@@ -80,15 +80,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.className} flex min-h-screen flex-col items-center antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        {children}
+        <Toaster />
+        <DynamicBackground />
       </body>
     </html>
   );

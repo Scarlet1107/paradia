@@ -1,12 +1,18 @@
 import React from "react";
-import { ThemeSwitcher } from "../ThemeSwitcher";
 import Link from "next/link";
+import Image from "next/image";
 
 const AuthHeader = () => {
   return (
-    <header className="flex w-screen items-center justify-between gap-4 bg-gray-100 p-8 md:px-16">
+    <header className="flex w-screen items-center justify-between gap-4 bg-gray-50 p-8 shadow-sm md:px-16">
       <Link href={"/"} className="text-xl md:text-2xl">
-        Scarlet7.net
+        <Image
+          src={"/header.png"}
+          alt="PARADIA"
+          height={100}
+          width={190}
+          className="mb-2"
+        />
       </Link>
       <div className="space-x-8">
         <div className="hidden space-x-4 sm:inline">
@@ -23,7 +29,6 @@ const AuthHeader = () => {
             登録
           </Link>
         </div>
-        <ThemeSwitcher />
       </div>
     </header>
   );
