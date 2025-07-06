@@ -21,7 +21,7 @@ interface PostsInfiniteProps {
   pageSize?: number;
 }
 
-type SortOrder = "desc" | "asc" | "most_liked" | "least_liked";
+type SortOrder = "desc" | "asc" | "most_liked";
 type TableName = "posts" | "posts_with_like_counts";
 
 export default function PostsInfinite({
@@ -36,8 +36,7 @@ export default function PostsInfinite({
     setIsClient(true);
   }, []);
 
-  const useLikesSort =
-    sortOrder === "most_liked" || sortOrder === "least_liked";
+  const useLikesSort = sortOrder === "most_liked";
   const tableName: TableName = useLikesSort
     ? "posts_with_like_counts"
     : "posts";
@@ -45,7 +44,7 @@ export default function PostsInfinite({
     ? "id, content, created_at, like_count, likes(post_id, user_id)"
     : "id, content, created_at, likes(post_id, user_id)";
   const sortColumn = useLikesSort ? "like_count" : "created_at";
-  const ascending = sortOrder === "asc" || sortOrder === "least_liked";
+  const ascending = sortOrder === "asc";
 
   // if (!isClient) {
   //     return (
