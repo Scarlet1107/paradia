@@ -20,6 +20,7 @@
     "@radix-ui/react-hover-card": "^1.1.14",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3",
+    "@supabase/postgrest-js": "^1.20.0",
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "^2.50.3",
     "class-variance-authority": "^0.7.1",
