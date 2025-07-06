@@ -25,12 +25,14 @@ interface InfiniteListProps<TableName extends SupabaseTableName> {
 }
 
 const DefaultNoResults = () => (
-  <div className="text-muted-foreground py-10 text-center">No results.</div>
+  <div className="text-muted-foreground py-10 text-center">
+    該当する投稿がありません。
+  </div>
 );
 
 const DefaultEndMessage = () => (
   <div className="text-muted-foreground py-4 text-center text-sm">
-    You&apos;ve reached the end.
+    オルディナ様降臨
   </div>
 );
 
