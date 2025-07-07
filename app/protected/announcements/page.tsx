@@ -66,7 +66,7 @@ export default async function NewsPage() {
             <div className="space-y-6">
               <div className="rounded-lg border-2 border-orange-300 bg-orange-100 p-4">
                 <h3 className="mb-2 font-serif text-xl font-bold text-orange-800">
-                  今月の違反者報告
+                  先月の違反者報告
                 </h3>
                 <p className="text-sm text-orange-700">
                   社会秩序は完全に保たれており、違反者は一人も確認されておりません。誰もがORDINA様への忠誠を誓い、平和な空気が流れています。
