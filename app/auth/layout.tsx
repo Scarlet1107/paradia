@@ -1,3 +1,4 @@
+// app/auth/layout.tsx
 import AuthHeader from "@/components/header/AuthHeader";
 
 export default function AuthLayout({
