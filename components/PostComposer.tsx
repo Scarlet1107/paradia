@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
-export default function PostComposer() {
+export default function PostComposer({ onPosted }: { onPosted: () => void }) {
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
@@ -56,7 +56,7 @@ export default function PostComposer() {
       console.error("投稿中のエラー:", err);
     } finally {
       setLoading(false);
-      router.refresh();
+      onPosted(); // 投稿後のコールバック
     }
   };
 
