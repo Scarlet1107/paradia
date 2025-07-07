@@ -1,3 +1,4 @@
+// app/protected/home/PostsInfinite.tsx
 "use client";
 
 import type React from "react";
