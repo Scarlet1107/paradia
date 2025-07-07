@@ -115,7 +115,7 @@ export default function Post({
               </div>
               <div className="absolute -right-0.5 -bottom-0 h-3 w-3 sm:-right-1 sm:-bottom-0 sm:h-4 sm:w-4 md:-right-1 md:-bottom-0 md:h-5 md:w-5">
                 <Image
-                  src="/2.png"
+                  src="/badge/2.png"
                   alt="User Badge"
                   width={40}
                   height={40}
