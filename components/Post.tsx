@@ -197,11 +197,11 @@ export default function Post({
                 size="sm"
                 disabled={!hasPermission}
                 className={`flex min-w-0 items-center gap-0.5 rounded-md p-1 text-orange-500 transition-colors hover:bg-orange-50 hover:text-orange-600 sm:gap-1 sm:rounded-lg sm:p-1.5 md:p-2 ${!hasPermission ? "cursor-not-allowed opacity-50" : ""}`}
-                onClick={() => setReportDialogOpen(true)}      
-        >
+                onClick={() => setReportDialogOpen(true)}
+              >
                 <UserX className="h-3 w-3 flex-shrink-0 sm:h-4 sm:w-4" />
                 <span className="text-[10px] font-medium sm:text-xs md:text-sm">
-                  {hasPermission ? {reportCount} : "-"}
+                  {hasPermission ? reportCount : "-"}
                 </span>
               </Button>
               <Button
@@ -270,13 +270,12 @@ export default function Post({
               <h3 className="text-sm font-semibold text-gray-900">
                 アクセス制限
               </h3>
-              <p className="max-w-xs text-xs leading-relaxed text-gray-600">
+              <p className="w-full text-center text-xs leading-relaxed text-gray-600">
                 あなたの権限では、この投稿を見ることはできません
               </p>
-              <div className="mt-2 text-xs text-orange-600">
-                必要な市民レベル: {visubilityLevel} | あなたのレベル:{" "}
-                {CitizenLevel}
-              </div>
+              <p className="mt-2 text-xs text-orange-600">
+                いいねを獲得することで、あなたの信頼度が上がり、より多くの投稿にアクセスできるようになります。
+              </p>
             </div>
           </div>
         </div>
