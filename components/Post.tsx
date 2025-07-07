@@ -176,7 +176,7 @@ export default function Post({
         <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4 md:p-6">
           <div className="mb-3 flex-1 sm:mb-4">
             <p
-              className={`text-xs leading-relaxed break-words text-gray-800 sm:text-sm md:text-base ${!hasPermission ? "blur-sm select-none" : ""}`}
+              className={`text-xs leading-relaxed break-words whitespace-pre-wrap text-gray-800 sm:text-sm md:text-base ${!hasPermission ? "blur-sm select-none" : ""}`}
             >
               {hasPermission
                 ? post.content
