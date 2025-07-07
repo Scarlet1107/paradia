@@ -8,6 +8,7 @@ import Image from "next/image";
 import { getBadgeUrlFromScore, getCitizenLevel } from "@/lib/trust";
 import { Badge } from "./ui/badge";
 import { useUser } from "@/context/UserContext";
+import ReportDialog from "@/components/ReportDialog";
 
 const DOT_COUNT = 8;
 const RADIUS = 24;
@@ -20,6 +21,7 @@ interface PostProps {
   trustScore: number;
   initialLikeCount: number;
   initialLiked: boolean;
+  initialReportCount?: number;
   onLikeUpdate?: (newCount: number, isLiked: boolean) => void;
 }
 
@@ -31,10 +33,12 @@ export default function Post({
   trustScore,
   initialLikeCount,
   initialLiked,
+  initialReportCount = 0,
   onLikeUpdate,
 }: PostProps) {
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [liked, setLiked] = useState(initialLiked);
+  const [reportCount, setReportCount] = useState(initialReportCount);
   const [loading, setLoading] = useState(false);
   const [explode, setExplode] = useState(false);
   const { userId } = useUser();
@@ -47,6 +51,7 @@ export default function Post({
     isOwnPost ||
     !visubilityLevel ||
     CitizenLevel >= Number.parseInt(visubilityLevel);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
 
   const handleLike = async () => {
     if (loading || !hasPermission) return;
@@ -84,6 +89,10 @@ export default function Post({
     }
 
     setLoading(false);
+  };
+
+  const handleReportSubmitted = () => {
+    setReportCount((prev) => prev + 1);
   };
 
   const dots = Array.from({ length: DOT_COUNT }, (_, i) => {
@@ -188,10 +197,11 @@ export default function Post({
                 size="sm"
                 disabled={!hasPermission}
                 className={`flex min-w-0 items-center gap-0.5 rounded-md p-1 text-orange-500 transition-colors hover:bg-orange-50 hover:text-orange-600 sm:gap-1 sm:rounded-lg sm:p-1.5 md:p-2 ${!hasPermission ? "cursor-not-allowed opacity-50" : ""}`}
-              >
+                onClick={() => setReportDialogOpen(true)}      
+        >
                 <UserX className="h-3 w-3 flex-shrink-0 sm:h-4 sm:w-4" />
                 <span className="text-[10px] font-medium sm:text-xs md:text-sm">
-                  {hasPermission ? "0" : "-"}
+                  {hasPermission ? {reportCount} : "-"}
                 </span>
               </Button>
               <Button
@@ -271,6 +281,12 @@ export default function Post({
           </div>
         </div>
       )}
+      <ReportDialog
+        open={reportDialogOpen}
+        onOpenChange={setReportDialogOpen}
+        postId={post.id}
+        onReportSubmitted={handleReportSubmitted}
+      />
     </div>
   );
 }
