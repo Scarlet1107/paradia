@@ -18,7 +18,6 @@ export default function PostComposer({ onPosted }: { onPosted: () => void }) {
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async () => {
     if (!content.trim()) return;
