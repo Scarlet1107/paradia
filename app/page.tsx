@@ -15,7 +15,7 @@ import {
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen w-screen flex-col items-center pb-16">
+    <main className="flex min-h-screen w-full flex-col items-center pb-16">
       {/* Header */}
       <AuthHeader />
 
