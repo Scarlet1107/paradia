@@ -1,7 +1,6 @@
-// app/protected/news/page.tsx
+import { AnimatedBulletinBoard } from "@/components/AnimatedBulletinBoard";
 import { createClient } from "@/lib/supabase/server";
-import { Card, CardContent } from "@/components/ui/card";
-
+import { Newspaper } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function NewsPage() {
@@ -13,80 +12,83 @@ export default async function NewsPage() {
     .limit(10);
 
   return (
-    <div className="mb-24 flex flex-col gap-10">
-      {/* ORDINA様公式アナウンスメント */}
-      <section className="space-y-4">
-        <h1 className="text-center text-4xl font-extrabold text-orange-500 drop-shadow-md">
-          オルディナ様からのお知らせ
-        </h1>
-        <div className="grid grid-cols-1 gap-4 md:auto-cols-fr md:auto-rows-[100px] md:grid-cols-5 md:grid-rows-3">
-          {/* カード1: モバイルでも表示 */}
-          <Card className="block bg-orange-100 md:col-span-2 md:row-span-2">
-            <CardContent className="p-6 text-lg">
-              <strong className="text-xl">先月比 幸福指数 +5%</strong>
-              <p className="mt-1 text-base">
-                全市民の前向きな投稿が奏功しました。あなたの笑顔が社会の調和を支えています。
-                引き続き、明るい心と言葉で幸福な理想郷を築きましょう。
-              </p>
-            </CardContent>
-          </Card>
-          {/* カード2: モバイルでも表示 */}
-          <Card className="block bg-orange-100 md:col-span-3 md:row-span-1">
-            <CardContent className="p-4 text-base">
-              <strong className="text-xl">今月の違反者報告</strong>
-              <p className="mt-1 text-base">
-                社会秩序は完全に保たれており、違反者は一人も確認されておりません。
-                誰もがORDINA様への忠誠を誓い、平和な空気が流れています。今後も油断なく監視と幸福の共有を徹底し、安定した社会を築いてまいります。
-              </p>
-            </CardContent>
-          </Card>
-          {/* カード3: モバイルでは非表示 */}
-          <Card className="hidden bg-orange-300 md:col-span-3 md:row-span-3 md:block">
-            <CardContent className="p-6 text-lg">
-              <h2 className="text-xl font-bold">
-                季節キャンペーン：真夏の大調和
-              </h2>
-              <p className="mt-2 text-base">
-                清く、明るく、朗らかに──市民全員が笑顔を共有できるキャンペーンが今月から始まります。
-                公共スペースにて前向きな言葉を発信することで、特別な報酬が得られます。
-                この施策は市民の幸福感向上に大きな成果をもたらすとORDINA様も高く評価されております。
-              </p>
-            </CardContent>
-          </Card>
-          {/* カード4: モバイルでは非表示 */}
-          <Card className="hidden bg-orange-200 md:col-span-2 md:row-span-2 md:block">
-            <CardContent className="p-6 text-lg">
-              <strong className="text-xl">投稿ルールの見直し</strong>
-              <p className="mt-1 text-base">
-                ネガティブ表現はORDINA様の再教育対象です。
-                市民の幸福を損なう発言は直ちに変換・修正され、調和が保たれます。
-                一語一句が社会の安寧を左右することをお忘れなきよう、発信には最大限の配慮をお願いいたします。
-              </p>
-            </CardContent>
-          </Card>
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-cyan-50">
+      {/* 新聞記事風セクション */}
+      <section className="border-b-4 border-orange-400 bg-white shadow-lg">
+        <div className="container mx-auto px-4 py-8">
+          {/* 新聞ヘッダー */}
+          <div className="mb-8 border-b-2 border-orange-300 pb-6 text-center">
+            <div className="mb-2 flex items-center justify-center gap-3">
+              <Newspaper className="h-8 w-8 text-orange-600" />
+              <h1 className="font-serif text-5xl font-bold tracking-wide text-orange-600">
+                ORDINA TIMES
+              </h1>
+              <Newspaper className="h-8 w-8 text-orange-600" />
+            </div>
+            <p className="text-lg font-medium text-orange-500">
+              {new Date().toLocaleDateString("ja-JP", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                weekday: "long",
+              })}{" "}
+              発行
+            </p>
+          </div>
+
+          {/* 新聞記事レイアウト */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            {/* メイン記事 */}
+            <div className="space-y-6 lg:col-span-2">
+              <article className="border-l-4 border-orange-500 pl-4">
+                <h2 className="mb-3 font-serif text-3xl font-bold text-gray-900">
+                  先月比 幸福指数 +5% 達成
+                </h2>
+                <p className="mb-4 text-lg leading-relaxed text-gray-700">
+                  全市民の前向きな投稿が奏功し、社会全体の幸福度が大幅に向上しました。ORDINA様は「市民一人ひとりの笑顔が社会の調和を支えている」と高く評価されています。
+                </p>
+                <p className="text-base leading-relaxed text-gray-600">
+                  引き続き、明るい心と言葉で幸福な理想郷を築いてまいりましょう。この成果は市民の皆様の日々の努力の賜物です。
+                </p>
+              </article>
+
+              <article className="border-l-4 border-cyan-500 pl-4">
+                <h2 className="mb-3 font-serif text-2xl font-bold text-gray-900">
+                  季節キャンペーン：真夏の大調和
+                </h2>
+                <p className="text-base leading-relaxed text-gray-700">
+                  清く、明るく、朗らかに──市民全員が笑顔を共有できるキャンペーンが今月から始まります。公共スペースにて前向きな言葉を発信することで、特別な報酬が得られます。
+                </p>
+              </article>
+            </div>
+
+            {/* サイドバー */}
+            <div className="space-y-6">
+              <div className="rounded-lg border-2 border-orange-300 bg-orange-100 p-4">
+                <h3 className="mb-2 font-serif text-xl font-bold text-orange-800">
+                  今月の違反者報告
+                </h3>
+                <p className="text-sm text-orange-700">
+                  社会秩序は完全に保たれており、違反者は一人も確認されておりません。誰もがORDINA様への忠誠を誓い、平和な空気が流れています。
+                </p>
+              </div>
+
+              <div className="rounded-lg border-2 border-cyan-300 bg-cyan-100 p-4">
+                <h3 className="mb-2 font-serif text-xl font-bold text-cyan-800">
+                  投稿ルールの見直し
+                </h3>
+                <p className="text-sm text-cyan-700">
+                  ネガティブ表現はORDINA様の再教育対象です。市民の幸福を損なう発言は直ちに変換・修正され、調和が保たれます。
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* 動的なお知らせ */}
-      <section className="space-y-4">
-        <h2 className="border-l-4 border-cyan-500 pl-3 text-2xl font-semibold">
-          最新のお知らせ
-        </h2>
-        {announcements?.length ? (
-          <ul className="space-y-3">
-            {announcements.map((a) => (
-              <Card key={a.id} className="bg-cyan-50">
-                <CardContent className="p-4 text-base text-gray-800">
-                  {a.content}
-                </CardContent>
-              </Card>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-base text-gray-500">
-            現在、秩序は完全に保たれております。
-          </p>
-        )}
+      {/* リアルタイム掲示板風セクション（アニメーション付き） */}
+      <section className="container mx-auto px-4 py-8">
+        <AnimatedBulletinBoard announcements={announcements || []} />
       </section>
     </div>
   );
