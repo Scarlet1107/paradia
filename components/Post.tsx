@@ -9,6 +9,7 @@ import { getBadgeUrlFromScore, getCitizenLevel } from "@/lib/trust";
 import { Badge } from "./ui/badge";
 import { useUser } from "@/context/UserContext";
 import ReportDialog from "@/components/ReportDialog";
+import ExpandableText from "./ExpandableText";
 
 const DOT_COUNT = 8;
 const RADIUS = 24;
@@ -175,13 +176,15 @@ export default function Post({
         <div className="w-px flex-shrink-0 bg-orange-500"></div>
         <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4 md:p-6">
           <div className="mb-3 flex-1 sm:mb-4">
-            <p
+            <ExpandableText
+              text={
+                hasPermission
+                  ? post.content
+                  : "この投稿の内容は制限されています。"
+              }
               className={`text-xs leading-relaxed break-words whitespace-pre-wrap text-gray-800 sm:text-sm md:text-base ${!hasPermission ? "blur-sm select-none" : ""}`}
-            >
-              {hasPermission
-                ? post.content
-                : "この投稿の内容は制限されています。"}
-            </p>
+              collapsedLines={4}
+            />
           </div>
           <div className="flex items-center justify-between gap-2 sm:gap-3">
             <time
