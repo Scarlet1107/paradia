@@ -91,8 +91,25 @@ export default function Post({
     return { angle, idx: i };
   });
 
-  const formatDate = (dateString: string) => {
+  const formatRelativeTime = (dateString: string) => {
     const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+
+    // 24時間以内の場合は相対時間表記
+    if (diffInMs < 24 * 60 * 60 * 1000) {
+      if (diffInMinutes < 1) {
+        return "たった今";
+      } else if (diffInMinutes < 60) {
+        return `${diffInMinutes}分前`;
+      } else {
+        return `${diffInHours}時間前`;
+      }
+    }
+
+    // 24時間を超える場合は日時表記
     return new Intl.DateTimeFormat("ja-JP", {
       year: "numeric",
       month: "numeric",
@@ -161,7 +178,9 @@ export default function Post({
             <time
               className={`flex-shrink-0 text-[10px] font-medium text-orange-500 sm:text-xs md:text-sm ${!hasPermission ? "blur-sm" : ""}`}
             >
-              {hasPermission ? formatDate(post.createdAt) : "****/**/**"}
+              {hasPermission
+                ? formatRelativeTime(post.createdAt)
+                : "****/**/**"}
             </time>
             <div className="flex flex-shrink-0 items-center gap-1 sm:gap-2 md:gap-3">
               <Button
@@ -241,11 +260,12 @@ export default function Post({
               <h3 className="text-sm font-semibold text-gray-900">
                 アクセス制限
               </h3>
-              <p className="w-full text-center text-xs leading-relaxed text-gray-600">
+              <p className="max-w-xs text-xs leading-relaxed text-gray-600">
                 あなたの権限では、この投稿を見ることはできません
               </p>
               <div className="mt-2 text-xs text-orange-600">
-                いいねを獲得することで、あなたの信頼度が上がり、より多くの投稿にアクセスできるようになります。
+                必要な市民レベル: {visubilityLevel} | あなたのレベル:{" "}
+                {CitizenLevel}
               </div>
             </div>
           </div>
