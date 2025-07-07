@@ -5,7 +5,7 @@ import { createContext, useContext, ReactNode } from "react";
  * 全ユーザー情報の型定義
  */
 export type UserProfile = {
-  id: string;
+  userId: string;
   nickname: string;
   trustScore: number;
 };

@@ -16,7 +16,7 @@ export default async function HomePage(): Promise<JSX.Element> {
   // 2) render only the client infinite scroll
   return (
     <div className="min-h-screen w-full">
-      <PostsInfinite userId={userId} />
+      <PostsInfinite />
       <PostComposer />
       <TrustScoreValue />
     </div>

@@ -39,7 +39,7 @@ export default async function ProtectedLayout({
 
   // 3. UserProfile 型にマッピング
   const profile: UserProfile = {
-    id: profileData.id,
+    userId: profileData.id,
     nickname: profileData.nickname,
     trustScore: profileData.trust_score,
   };

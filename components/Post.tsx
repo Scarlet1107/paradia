@@ -5,12 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Heart, UserX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { getBadgeUrlFromScore } from "@/lib/trust";
 
 const DOT_COUNT = 8;
 const RADIUS = 24;
 
 interface PostProps {
   post: { id: string; content: string; createdAt: string };
+  authorId: string;
+  author: string;
+  trustScore: number;
   initialLikeCount: number;
   initialLiked: boolean;
   onLikeUpdate?: (newCount: number, isLiked: boolean) => void;
@@ -18,6 +22,9 @@ interface PostProps {
 
 export default function Post({
   post,
+  authorId,
+  author,
+  trustScore,
   initialLikeCount,
   initialLiked,
   onLikeUpdate,
@@ -84,6 +91,8 @@ export default function Post({
     }).format(date);
   };
 
+  const citizenBadgeUrl = getBadgeUrlFromScore(trustScore);
+
   return (
     <div className="overflow-hidden rounded-2xl border border-orange-500 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
       <div className="flex">
@@ -93,11 +102,11 @@ export default function Post({
           <div className="flex flex-1 flex-col items-center justify-end bg-gradient-to-br from-orange-100 to-pink-50 pt-4 pb-2 sm:pt-6 sm:pb-3 md:pt-8">
             <div className="px-1 text-center">
               <div className="mb-0.5 text-[10px] leading-tight font-bold text-orange-600 sm:mb-1 sm:text-xs md:text-sm">
-                市民
+                {author}
               </div>
-              <div className="text-[8px] leading-tight font-medium tracking-wide text-orange-500 sm:text-xs">
+              {/* <div className="text-[8px] leading-tight font-medium tracking-wide text-orange-500 sm:text-xs">
                 SHIMIN
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -115,7 +124,7 @@ export default function Post({
               </div>
               <div className="absolute -right-0.5 -bottom-0 h-3 w-3 sm:-right-1 sm:-bottom-0 sm:h-4 sm:w-4 md:-right-1 md:-bottom-0 md:h-5 md:w-5">
                 <Image
-                  src="/badge/2.png"
+                  src={citizenBadgeUrl}
                   alt="User Badge"
                   width={40}
                   height={40}

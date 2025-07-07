@@ -35,7 +35,7 @@ const TrustScoreValue = () => {
     }, intervalMs);
 
     return () => clearInterval(timer);
-  }, [trustScore]);
+  }, [displayScore, trustScore]);
 
   return (
     <div>
