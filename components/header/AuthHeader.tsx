@@ -20,7 +20,7 @@ const AuthHeader = () => {
   ];
 
   return (
-    <header className="flex w-screen items-center justify-between gap-4 bg-gray-50 p-4 shadow-sm md:px-16">
+    <header className="flex w-full items-center justify-between gap-4 bg-gray-50 p-4 shadow-sm md:px-16">
       <Link href={"/"} className="text-xl md:text-2xl">
         <Image
           src={"/header.png"}
