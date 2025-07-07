@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import PostsInfinite from "@/app/protected/home/PostsInfinite";
 import { JSX } from "react";
+import PostComposer from "@/components/PostComposer";
+import TrustScoreValue from "@/components/TrustScoreValue";
 
 export default async function HomePage(): Promise<JSX.Element> {
   // 1) server‐side auth only
@@ -14,7 +16,9 @@ export default async function HomePage(): Promise<JSX.Element> {
   // 2) render only the client infinite scroll
   return (
     <div className="min-h-screen w-full">
-      <PostsInfinite userId={userId} />
+      <PostsInfinite />
+      <PostComposer />
+      <TrustScoreValue />
     </div>
   );
 }

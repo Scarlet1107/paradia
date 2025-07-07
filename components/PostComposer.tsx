@@ -52,11 +52,11 @@ export default function PostComposer() {
 
       setOpen(false);
       setContent("");
-      router.refresh();
     } catch (err) {
       console.error("投稿中のエラー:", err);
     } finally {
       setLoading(false);
+      router.refresh();
     }
   };
 

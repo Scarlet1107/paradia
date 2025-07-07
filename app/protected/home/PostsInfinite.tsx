@@ -1,25 +1,30 @@
+// app/protected/home/PostsInfinite.tsx
 "use client";
 
 import type React from "react";
 import { useState, useEffect } from "react";
 import { InfiniteList } from "@/components/InfiniteList";
 import Post from "@/components/Post";
-import PostComposer from "@/components/PostComposer";
 import SearchSortHeader from "@/components/SearchSortHeader";
 import type { SupabaseSelectBuilder } from "@/hooks/use-infinite-query";
-import TrustScoreValue from "@/components/TrustScoreValue";
+import { useUser } from "@/context/UserContext";
 
 interface PostWithLikes {
   id: string;
   content: string;
+  author_id: string;
+  visibility_level: "1" | "2" | "3" | "4" | "5" | null;
   created_at: string;
   like_count?: number;
   likes?: { post_id: string; user_id: string }[];
+  author: {
+    nickname?: string;
+    trust_score?: number;
+  };
   reports?: { id: string }[];
 }
 
 interface PostsInfiniteProps {
-  userId: string;
   pageSize?: number;
 }
 
@@ -27,9 +32,9 @@ type SortOrder = "desc" | "asc" | "most_liked";
 type TableName = "posts" | "posts_with_like_counts";
 
 export default function PostsInfinite({
-  userId,
   pageSize = 10,
 }: PostsInfiniteProps): React.JSX.Element {
+  const { userId } = useUser();
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [, setIsClient] = useState(false);
@@ -43,8 +48,8 @@ export default function PostsInfinite({
     ? "posts_with_like_counts"
     : "posts";
   const columns = useLikesSort
-    ? "id, content, created_at, like_count, likes(post_id, user_id), reports(id)"
-    : "id, content, created_at, likes(post_id, user_id), reports(id)";
+    ? "id, content, author_id, visibility_level, created_at, like_count, likes(post_id, user_id), author:profiles(nickname, trust_score), reports(id)"
+    : "id, content, author_id, visibility_level, created_at, likes(post_id, user_id), author:profiles(nickname, trust_score), reports(id)";
   const sortColumn = useLikesSort ? "like_count" : "created_at";
   const ascending = sortOrder === "asc";
 
@@ -103,6 +108,8 @@ export default function PostsInfinite({
             const initialLiked =
               post.likes?.some((l) => l.user_id === userId) ?? false;
 
+            const nickname = post.author?.nickname ?? "抹消済み市民";
+            const trustScore = post.author?.trust_score ?? 0;
             return (
               <Post
                 key={post.id}
@@ -111,6 +118,10 @@ export default function PostsInfinite({
                   content: post.content,
                   createdAt: post.created_at,
                 }}
+                authorId={post.author_id}
+                visubilityLevel={post.visibility_level}
+                author={nickname}
+                trustScore={trustScore}
                 initialLikeCount={likeCount}
                 initialLiked={initialLiked}
                 initialReportCount={reportCount}
@@ -119,8 +130,6 @@ export default function PostsInfinite({
           }}
         />
       </div>
-      <PostComposer />
-      <TrustScoreValue />
     </div>
   );
 }
