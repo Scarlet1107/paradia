@@ -117,8 +117,6 @@ export default function PostsInfinite({
           }}
         />
       </div>
-      <PostComposer />
-      <TrustScoreValue />
     </div>
   );
 }
