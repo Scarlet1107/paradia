@@ -13,6 +13,7 @@ interface PostWithLikes {
   id: string;
   content: string;
   author_id: string;
+  visibility_level: "1" | "2" | "3" | "4" | "5" | null;
   created_at: string;
   like_count?: number;
   likes?: { post_id: string; user_id: string }[];
@@ -46,8 +47,8 @@ export default function PostsInfinite({
     ? "posts_with_like_counts"
     : "posts";
   const columns = useLikesSort
-    ? "id, content, author_id, created_at, like_count, likes(post_id, user_id), author:profiles(nickname, trust_score)"
-    : "id, content, author_id, created_at, likes(post_id, user_id), author:profiles(nickname, trust_score)";
+    ? "id, content, author_id, visibility_level, created_at, like_count, likes(post_id, user_id), author:profiles(nickname, trust_score)"
+    : "id, content, author_id, visibility_level, created_at, likes(post_id, user_id), author:profiles(nickname, trust_score)";
   const sortColumn = useLikesSort ? "like_count" : "created_at";
   const ascending = sortOrder === "asc";
 
@@ -116,6 +117,7 @@ export default function PostsInfinite({
                   createdAt: post.created_at,
                 }}
                 authorId={post.author_id}
+                visubilityLevel={post.visibility_level}
                 author={nickname}
                 trustScore={trustScore}
                 initialLikeCount={likeCount}
