@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, UserX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import ReportDialog from "@/components/ReportDialog";
 
 const DOT_COUNT = 8;
 const RADIUS = 24;
@@ -13,6 +14,7 @@ interface PostProps {
   post: { id: string; content: string; createdAt: string };
   initialLikeCount: number;
   initialLiked: boolean;
+  initialReportCount?: number;
   onLikeUpdate?: (newCount: number, isLiked: boolean) => void;
 }
 
@@ -20,12 +22,15 @@ export default function Post({
   post,
   initialLikeCount,
   initialLiked,
+  initialReportCount = 0,
   onLikeUpdate,
 }: PostProps) {
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [liked, setLiked] = useState(initialLiked);
+  const [reportCount, setReportCount] = useState(initialReportCount);
   const [loading, setLoading] = useState(false);
   const [explode, setExplode] = useState(false);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
 
   const handleLike = async () => {
     if (loading) return;
@@ -65,6 +70,10 @@ export default function Post({
     }
 
     setLoading(false);
+  };
+
+  const handleReportSubmitted = () => {
+    setReportCount((prev) => prev + 1);
   };
 
   const dots = Array.from({ length: DOT_COUNT }, (_, i) => {
@@ -143,11 +152,12 @@ export default function Post({
               <Button
                 variant="ghost"
                 size="sm"
-                className="flex min-w-0 items-center gap-0.5 rounded-md p-1 text-orange-500 transition-colors hover:bg-orange-50 hover:text-orange-600 sm:gap-1 sm:rounded-lg sm:p-1.5 md:p-2"
+                onClick={() => setReportDialogOpen(true)}
+                className="flex min-w-0 items-center gap-0.5 rounded-md p-1 text-orange-500 transition-colors hover:bg-red-50 hover:text-red-600 sm:gap-1 sm:rounded-lg sm:p-1.5 md:p-2"
               >
                 <UserX className="h-3 w-3 flex-shrink-0 sm:h-4 sm:w-4" />
                 <span className="text-[10px] font-medium sm:text-xs md:text-sm">
-                  0
+                  {reportCount}
                 </span>
               </Button>
 
@@ -206,6 +216,13 @@ export default function Post({
           </div>
         </div>
       </div>
+
+      <ReportDialog
+        open={reportDialogOpen}
+        onOpenChange={setReportDialogOpen}
+        postId={post.id}
+        onReportSubmitted={handleReportSubmitted}
+      />
     </div>
   );
 }

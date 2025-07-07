@@ -15,6 +15,7 @@ interface PostWithLikes {
   created_at: string;
   like_count?: number;
   likes?: { post_id: string; user_id: string }[];
+  reports?: { id: string }[];
 }
 
 interface PostsInfiniteProps {
@@ -42,8 +43,8 @@ export default function PostsInfinite({
     ? "posts_with_like_counts"
     : "posts";
   const columns = useLikesSort
-    ? "id, content, created_at, like_count, likes(post_id, user_id)"
-    : "id, content, created_at, likes(post_id, user_id)";
+    ? "id, content, created_at, like_count, likes(post_id, user_id), reports(id)"
+    : "id, content, created_at, likes(post_id, user_id), reports(id)";
   const sortColumn = useLikesSort ? "like_count" : "created_at";
   const ascending = sortOrder === "asc";
 
@@ -98,6 +99,7 @@ export default function PostsInfinite({
             const likeCount = useLikesSort
               ? (post.like_count ?? 0)
               : (post.likes?.length ?? 0);
+            const reportCount = post.reports?.length ?? 0;
             const initialLiked =
               post.likes?.some((l) => l.user_id === userId) ?? false;
 
@@ -111,6 +113,7 @@ export default function PostsInfinite({
                 }}
                 initialLikeCount={likeCount}
                 initialLiked={initialLiked}
+                initialReportCount={reportCount}
               />
             );
           }}
