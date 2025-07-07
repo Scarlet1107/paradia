@@ -183,10 +183,10 @@ export default function Post({
                   : "この投稿の内容は制限されています。"
               }
               className={`text-xs leading-relaxed break-words whitespace-pre-wrap text-gray-800 sm:text-sm md:text-base ${!hasPermission ? "blur-sm select-none" : ""}`}
-              collapsedLines={4}
+              collapsedLines={3}
             />
           </div>
-          <div className="flex items-center justify-between gap-2 sm:gap-3">
+          <div className="-my-2 flex items-center justify-between gap-2 sm:gap-3">
             <time
               className={`flex-shrink-0 text-[10px] font-medium text-orange-500 sm:text-xs md:text-sm ${!hasPermission ? "blur-sm" : ""}`}
             >

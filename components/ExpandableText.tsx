@@ -10,13 +10,13 @@ import clsx from "clsx";
 interface ExpandableTextProps {
   text: string;
   className?: string;
-  collapsedLines?: number; // デフォルト：4行
+  collapsedLines?: number; // デフォルト：3行
 }
 
 export default function ExpandableText({
   text,
   className = "",
-  collapsedLines = 4,
+  collapsedLines = 3,
 }: ExpandableTextProps) {
   const [expanded, setExpanded] = useState(false);
   const [showToggle, setShowToggle] = useState(false);
@@ -57,7 +57,7 @@ export default function ExpandableText({
         <Button
           variant="link"
           size="sm"
-          className="mt-1 inline-flex items-center gap-1 px-0"
+          className="inline-flex items-center gap-1 px-0"
           onClick={() => setExpanded((v) => !v)}
         >
           {expanded ? (
