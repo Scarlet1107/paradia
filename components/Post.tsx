@@ -6,6 +6,8 @@ import { Heart, UserX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { getBadgeUrlFromScore } from "@/lib/trust";
+import { Badge } from "./ui/badge";
+import { useUser } from "@/context/UserContext";
 
 const DOT_COUNT = 8;
 const RADIUS = 24;
@@ -33,6 +35,7 @@ export default function Post({
   const [liked, setLiked] = useState(initialLiked);
   const [loading, setLoading] = useState(false);
   const [explode, setExplode] = useState(false);
+  const { userId } = useUser();
 
   const handleLike = async () => {
     if (loading) return;
@@ -104,9 +107,10 @@ export default function Post({
               <div className="mb-0.5 text-[10px] leading-tight font-bold text-orange-600 sm:mb-1 sm:text-xs md:text-sm">
                 {author}
               </div>
-              {/* <div className="text-[8px] leading-tight font-medium tracking-wide text-orange-500 sm:text-xs">
-                SHIMIN
-              </div> */}
+              {/* 自分自身の投稿であることがわかるようにYouバッジを追加。ただデザイン的にいいかわからないので、話し合い必要 - shogo */}
+              {userId === authorId && (
+                <Badge className="bg-orange-500 text-white">You</Badge>
+              )}
             </div>
           </div>
 
