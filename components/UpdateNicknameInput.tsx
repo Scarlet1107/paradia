@@ -1,17 +1,15 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/context/UserContext";
 
-interface Props {
-  nickname: string;
-}
-
-const UpdateNicknameInput = ({ nickname }: Props) => {
+const UpdateNicknameInput = () => {
+  const { nickname } = useUser();
   const [input, setInput] = useState(nickname || "");
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
@@ -19,9 +17,15 @@ const UpdateNicknameInput = ({ nickname }: Props) => {
   const router = useRouter();
 
   const isUnchanged = useMemo(
-    () => input.trim() === nickname.trim(),
+    () =>
+      input.trim() ===
+      (nickname && typeof nickname === "string" ? nickname.trim() : ""),
     [input, nickname],
   );
+
+  useEffect(() => {
+    setInput(nickname || "");
+  }, [nickname]);
 
   const handleSubmit = async () => {
     if (isUnchanged) {
