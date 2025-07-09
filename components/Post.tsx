@@ -22,6 +22,7 @@ interface PostProps {
   authorId: string;
   visubilityLevel?: "1" | "2" | "3" | "4" | "5" | null;
   author: string;
+  authorTrustScore: number;
   initialLikeCount: number;
   initialLiked: boolean;
   initialReportCount?: number;
@@ -33,6 +34,7 @@ export default function Post({
   authorId,
   visubilityLevel,
   author,
+  authorTrustScore,
   initialLikeCount,
   initialLiked,
   initialReportCount = 0,
@@ -43,10 +45,10 @@ export default function Post({
   const [reportCount, setReportCount] = useState(initialReportCount);
   const [loading, setLoading] = useState(false);
   const [explode, setExplode] = useState(false);
-  const { userId, trustScore } = useUser();
+  const { userId, trustScore: userTrustScore } = useUser();
   const router = useRouter();
 
-  const CitizenLevel = getCitizenLevel(trustScore);
+  const CitizenLevel = getCitizenLevel(userTrustScore);
 
   // 権限チェック: 自分の投稿でない場合のみチェック
   const isOwnPost = userId === authorId;
@@ -104,7 +106,7 @@ export default function Post({
     return { angle, idx: i };
   });
 
-  const citizenBadgeUrl = getBadgeUrlFromScore(trustScore);
+  const citizenBadgeUrl = getBadgeUrlFromScore(authorTrustScore);
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-orange-500 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
