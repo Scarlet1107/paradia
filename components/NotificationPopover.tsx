@@ -50,7 +50,7 @@ export const NotificationPopover: React.FC = () => {
       }
     };
     markRead();
-  }, [open, notifications, supabase]);
+  }, [open, notifications, supabase, router]);
 
   // notificationsが読み込まれたら、loadingをfalseにする
   useEffect(() => {
