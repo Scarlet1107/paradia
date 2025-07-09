@@ -56,22 +56,31 @@ export async function POST(
     return NextResponse.json({ error: likeErr.message }, { status: 400 });
   }
 
-  // 5) Bump author’s trust by +1
-  const { data: profA, error: profAErr } = await supabase
+  // 5) Bump author's trust by +1
+  const { data: authorProfile, error: authorProfileErr } = await supabase
     .from("profiles")
-    .select("nickname, trust_score")
+    .select("trust_score")
     .eq("id", post.author_id)
     .single();
-  if (!profAErr && profA?.trust_score != null) {
+  const { data: likerProfile, error: likerProfileErr } = await supabase
+    .from("profiles")
+    .select("nickname")
+    .eq("id", user.id)
+    .single();
+  if (
+    !authorProfileErr &&
+    authorProfile?.trust_score != null &&
+    !likerProfileErr
+  ) {
     await supabase
       .from("profiles")
-      .update({ trust_score: Math.min(100, profA.trust_score + 1) })
+      .update({ trust_score: Math.min(100, authorProfile.trust_score + 1) })
       .eq("id", post.author_id);
 
     // 6) Create notification
     const { error: notifErr } = await supabase.from("notifications").insert({
       recipient_id: post.author_id,
-      content: `${profA.nickname || "誰か"}さんがあなたの投稿にいいねをしました。\n信頼度+1`,
+      content: `${likerProfile?.nickname || "誰か"}さんがあなたの投稿にいいねをしました。\n信頼度+1`,
     });
     if (notifErr) console.error("通知作成失敗:", notifErr);
   }
