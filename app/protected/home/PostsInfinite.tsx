@@ -122,6 +122,7 @@ export default function PostsInfinite({
                 authorTrustScore={trustScore}
                 visubilityLevel={post.visibility_level}
                 author={nickname}
+                trustScore={trustScore}
                 initialLikeCount={likeCount}
                 initialLiked={initialLiked}
                 initialReportCount={reportCount}
