@@ -25,6 +25,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { formatRelativeTime } from "@/lib/time";
 
 const DOT_COUNT = 8;
 const RADIUS = 24;
