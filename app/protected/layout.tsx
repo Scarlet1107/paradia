@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import Header from "@/components/header/Header";
 import { createClient } from "@/lib/supabase/server";
 import { UserProvider, type UserProfile } from "@/context/UserContext";
+import { NotificationProvider } from "@/context/NotificationProvider";
 
 export default async function ProtectedLayout({
   children,
@@ -44,13 +45,26 @@ export default async function ProtectedLayout({
     trustScore: profileData.trust_score,
   };
 
-  // 4. Context で配布
+  // 4. 通知を取得
+  console.log("ユーザーの通知を取得中", user.id);
+  const { data: initialNotifications, error } = await supabase
+    .from("notifications")
+    .select("id, content, is_read, created_at")
+    .eq("recipient_id", user.id)
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.error("通知の取得に失敗しました", error);
+  }
+
+  // 5. Context で配布
   return (
     <UserProvider profile={profile}>
-      <Header />
-      <main className="flex max-w-5xl flex-1 flex-col gap-20 p-5">
-        {children}
-      </main>
+      <NotificationProvider notifications={initialNotifications || []}>
+        <Header />
+        <main className="flex max-w-5xl flex-1 flex-col gap-20 p-5">
+          {children}
+        </main>
+      </NotificationProvider>
     </UserProvider>
   );
 }

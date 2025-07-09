@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useNotifications } from "@/context/NotificationProvider";
 
 export interface Notification {
   id: string;
@@ -21,32 +22,11 @@ export interface Notification {
 }
 
 export const NotificationPopover: React.FC = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
-
-  // 初回通知取得
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from("notifications")
-          .select("id, content, is_read, created_at")
-          .order("created_at", { ascending: false });
-        if (error) throw error;
-        setNotifications(data ?? []);
-      } catch (err) {
-        console.error("通知の取得に失敗しました", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchNotifications();
-  }, [supabase]);
-
+  const notifications = useNotifications();
   const unreadCount = notifications.filter((n) => !n.is_read).length;
+  const supabase = createClient();
 
   // ポップオーバー開閉監視: 開いたら未読を既読化
   useEffect(() => {
@@ -61,9 +41,6 @@ export const NotificationPopover: React.FC = () => {
             .update({ is_read: true })
             .in("id", idsToMark);
           if (error) throw error;
-          setNotifications((prev) =>
-            prev.map((n) => ({ ...n, is_read: true })),
-          );
         } catch (err) {
           console.error("通知の既読更新に失敗しました", err);
         }
@@ -72,10 +49,17 @@ export const NotificationPopover: React.FC = () => {
     markRead();
   }, [open, notifications, supabase]);
 
+  // notificationsが読み込まれたら、loadingをfalseにする
+  useEffect(() => {
+    if (notifications.length > 0) {
+      setLoading(false);
+    }
+  }, [notifications]);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" className="relative">
+        <Button variant="ghost" className="relative cursor-pointer">
           <Bell className="h-5 w-5 text-orange-600" />
           {unreadCount > 0 && (
             <Badge className="absolute -top-1 -right-1 rounded-full bg-orange-600 text-white">

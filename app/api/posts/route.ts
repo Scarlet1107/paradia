@@ -152,7 +152,7 @@ export async function POST(request: Request) {
       const { error } = await supabase.from("notifications").insert([
         {
           recipient_id: user.id,
-          content: `Lv.${aiResult.negativity_level}の有害投稿が検出されました。信頼度${adjust < 0 ? "減少" : "上昇"}→${newScore}`,
+          content: `Lv.${aiResult.negativity_level}の有害投稿が検出されました。\n信頼度${adjust < 0 ? "減少" : "上昇"}→${newScore}`,
         },
       ]);
 
