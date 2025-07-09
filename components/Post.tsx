@@ -299,14 +299,14 @@ export default function Post({
       {!hasPermission && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm">
           <div className="flex flex-col items-center justify-center space-y-3 p-6 text-center">
-            <div className="rounded-full bg-orange-100 p-3">
+            <div className="rounded-full bg-orange-100 p-2 md:p-3">
               <Lock className="h-6 w-6 text-orange-600" />
             </div>
-            <div className="space-y-1">
+            <div className="-space-y-1 md:space-y-1">
               <h3 className="text-sm font-semibold text-gray-900">
                 アクセス制限
               </h3>
-              <p className="w-full text-center text-xs leading-relaxed text-gray-600">
+              <p className="hidden w-full text-center text-xs leading-relaxed text-gray-600 md:block">
                 あなたの権限では、この投稿を見ることはできません
               </p>
               <p className="mt-2 text-xs text-orange-600">
