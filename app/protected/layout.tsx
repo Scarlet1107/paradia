@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import Header from "@/components/header/Header";
 import { createClient } from "@/lib/supabase/server";
 import { UserProvider, type UserProfile } from "@/context/UserContext";
-import { NotificationProvider } from "@/context/NotificationProvider";
+import { NotificationProvider } from "@/context/NotificationContext";
 
 export default async function ProtectedLayout({
   children,
