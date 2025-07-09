@@ -12,7 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { useNotifications } from "@/context/NotificationProvider";
+import { useNotifications } from "@/context/NotificationContext";
+import { useRouter } from "next/navigation";
 
 export interface Notification {
   id: string;
@@ -27,6 +28,7 @@ export const NotificationPopover: React.FC = () => {
   const notifications = useNotifications();
   const unreadCount = notifications.filter((n) => !n.is_read).length;
   const supabase = createClient();
+  const router = useRouter();
 
   // ポップオーバー開閉監視: 開いたら未読を既読化
   useEffect(() => {
@@ -40,6 +42,7 @@ export const NotificationPopover: React.FC = () => {
             .from("notifications")
             .update({ is_read: true })
             .in("id", idsToMark);
+          router.refresh(); // 通知を更新
           if (error) throw error;
         } catch (err) {
           console.error("通知の既読更新に失敗しました", err);
