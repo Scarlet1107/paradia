@@ -110,7 +110,7 @@ export default function Ranking({
           className="mb-8 text-center"
         >
           <h1 className="mb-4 bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 bg-clip-text text-4xl font-bold text-transparent drop-shadow-2xl sm:text-5xl lg:text-6xl">
-            📊 ランキング 📊
+            ランキング
           </h1>
           <p className="text-lg font-medium text-orange-600 drop-shadow-lg sm:text-xl">
             献身度の記録
