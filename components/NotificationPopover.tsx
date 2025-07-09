@@ -26,6 +26,7 @@ export const NotificationPopover: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
+  // 初回通知取得
   useEffect(() => {
     const fetchNotifications = async () => {
       setLoading(true);
@@ -42,17 +43,40 @@ export const NotificationPopover: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchNotifications();
-  }, []);
+  }, [supabase]);
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+  // ポップオーバー開閉監視: 開いたら未読を既読化
+  useEffect(() => {
+    const markRead = async () => {
+      const idsToMark = notifications
+        .filter((n) => !n.is_read)
+        .map((n) => n.id);
+      if (open && idsToMark.length > 0) {
+        try {
+          const { error } = await supabase
+            .from("notifications")
+            .update({ is_read: true })
+            .in("id", idsToMark);
+          if (error) throw error;
+          setNotifications((prev) =>
+            prev.map((n) => ({ ...n, is_read: true })),
+          );
+        } catch (err) {
+          console.error("通知の既読更新に失敗しました", err);
+        }
+      }
+    };
+    markRead();
+  }, [open, notifications, supabase]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" className="relative">
-          <Bell className="h-8 w-8 text-orange-500" />
+          <Bell className="h-5 w-5 text-orange-600" />
           {unreadCount > 0 && (
             <Badge className="absolute -top-1 -right-1 rounded-full bg-orange-600 text-white">
               {unreadCount}
@@ -63,7 +87,7 @@ export const NotificationPopover: React.FC = () => {
       <PopoverContent className="w-80 p-0">
         <Card className="border-orange-200">
           <CardHeader>
-            <CardTitle className="text-orange-500">お知らせ</CardTitle>
+            <CardTitle className="text-orange-600">通知</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <ScrollArea className="h-64">
