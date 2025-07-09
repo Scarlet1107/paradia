@@ -109,6 +109,7 @@ export default function PostsInfinite({
               post.likes?.some((l) => l.user_id === userId) ?? false;
 
             const nickname = post.author?.nickname ?? "抹消済み市民";
+            const trustScore = post.author?.trust_score ?? 0;
             return (
               <Post
                 key={post.id}
@@ -118,6 +119,7 @@ export default function PostsInfinite({
                   createdAt: post.created_at,
                 }}
                 authorId={post.author_id}
+                authorTrustScore={trustScore}
                 visubilityLevel={post.visibility_level}
                 author={nickname}
                 initialLikeCount={likeCount}

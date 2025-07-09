@@ -72,7 +72,7 @@ export const NotificationPopover: React.FC = () => {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0">
+      <PopoverContent className="w-80 rounded-2xl p-0">
         <Card className="border-orange-200">
           <CardHeader>
             <CardTitle className="text-orange-600">通知</CardTitle>
