@@ -22,7 +22,6 @@ interface PostProps {
   authorId: string;
   visubilityLevel?: "1" | "2" | "3" | "4" | "5" | null;
   author: string;
-  trustScore: number;
   initialLikeCount: number;
   initialLiked: boolean;
   initialReportCount?: number;
@@ -34,7 +33,6 @@ export default function Post({
   authorId,
   visubilityLevel,
   author,
-  trustScore,
   initialLikeCount,
   initialLiked,
   initialReportCount = 0,
@@ -45,17 +43,21 @@ export default function Post({
   const [reportCount, setReportCount] = useState(initialReportCount);
   const [loading, setLoading] = useState(false);
   const [explode, setExplode] = useState(false);
-  const { userId } = useUser();
+  const { userId, trustScore } = useUser();
   const router = useRouter();
 
   const CitizenLevel = getCitizenLevel(trustScore);
 
   // 権限チェック: 自分の投稿でない場合のみチェック
   const isOwnPost = userId === authorId;
+  console.log("isOwnPost:", isOwnPost);
+  console.log("visubilityLevel:", visubilityLevel);
+  console.log("CitizenLevel:", CitizenLevel);
   const hasPermission =
     isOwnPost ||
     !visubilityLevel ||
     CitizenLevel >= Number.parseInt(visubilityLevel);
+  console.log("hasPermission:", hasPermission);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
 
   const handleLike = async () => {
