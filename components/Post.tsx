@@ -1,3 +1,4 @@
+// components/Post.tsx
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -10,6 +11,8 @@ import { Badge } from "./ui/badge";
 import { useUser } from "@/context/UserContext";
 import ReportDialog from "@/components/ReportDialog";
 import ExpandableText from "./ExpandableText";
+import { useRouter } from "next/navigation";
+import { formatRelativeTime } from "@/lib/time";
 
 const DOT_COUNT = 8;
 const RADIUS = 24;
@@ -19,7 +22,6 @@ interface PostProps {
   authorId: string;
   visubilityLevel?: "1" | "2" | "3" | "4" | "5" | null;
   author: string;
-  trustScore: number;
   initialLikeCount: number;
   initialLiked: boolean;
   initialReportCount?: number;
@@ -31,7 +33,6 @@ export default function Post({
   authorId,
   visubilityLevel,
   author,
-  trustScore,
   initialLikeCount,
   initialLiked,
   initialReportCount = 0,
@@ -42,7 +43,8 @@ export default function Post({
   const [reportCount, setReportCount] = useState(initialReportCount);
   const [loading, setLoading] = useState(false);
   const [explode, setExplode] = useState(false);
-  const { userId } = useUser();
+  const { userId, trustScore } = useUser();
+  const router = useRouter();
 
   const CitizenLevel = getCitizenLevel(trustScore);
 
@@ -78,6 +80,7 @@ export default function Post({
       setLiked(false);
       setLikeCount((c) => c - delta);
       toast.error("自分の投稿にはいいねできません！信頼度が1減少しました。");
+      router.refresh();
       setLoading(false);
       return;
     }
@@ -100,35 +103,6 @@ export default function Post({
     const angle = (2 * Math.PI * i) / DOT_COUNT;
     return { angle, idx: i };
   });
-
-  const formatRelativeTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-
-    // 24時間以内の場合は相対時間表記
-    if (diffInMs < 24 * 60 * 60 * 1000) {
-      if (diffInMinutes < 1) {
-        return "たった今";
-      } else if (diffInMinutes < 60) {
-        return `${diffInMinutes}分前`;
-      } else {
-        return `${diffInHours}時間前`;
-      }
-    }
-
-    // 24時間を超える場合は日時表記
-    return new Intl.DateTimeFormat("ja-JP", {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: false,
-    }).format(date);
-  };
 
   const citizenBadgeUrl = getBadgeUrlFromScore(trustScore);
 
@@ -183,10 +157,10 @@ export default function Post({
                   : "この投稿の内容は制限されています。"
               }
               className={`text-xs leading-relaxed break-words whitespace-pre-wrap text-gray-800 sm:text-sm md:text-base ${!hasPermission ? "blur-sm select-none" : ""}`}
-              collapsedLines={4}
+              collapsedLines={3}
             />
           </div>
-          <div className="flex items-center justify-between gap-2 sm:gap-3">
+          <div className="-my-2 flex items-center justify-between gap-2 sm:gap-3">
             <time
               className={`flex-shrink-0 text-[10px] font-medium text-orange-500 sm:text-xs md:text-sm ${!hasPermission ? "blur-sm" : ""}`}
             >
