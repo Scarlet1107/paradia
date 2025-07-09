@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import OpenAI from "openai";
-import {
-  ORDINA_JUDGEMENT_PROMPT,
-  ORDINA_HIDDEN_SCAN_PROMPT,
-} from "@/config/prompt";
+import { ORDINA_COMBINED_PROMPT } from "@/config/prompt";
 
 const AI_RESPONSE_SCHEMA = z.object({
   explanation: z.string(),
@@ -29,7 +26,7 @@ const judgeReport = async (
   reportWeight: number,
   reportReason: string,
 ): Promise<AIResult> => {
-  const systemPrompt = `${ORDINA_JUDGEMENT_PROMPT.trim()}`;
+  const systemPrompt = `${ORDINA_COMBINED_PROMPT.trim()}`;
 
   const aiInput = {
     post_content: content,
@@ -211,18 +208,12 @@ export async function POST(request: Request) {
 
     const totalReportWeight = existingReportWeight + Math.max(0, reportWeight);
 
-    // AI判定を実行
-    try {
-      const aiJudgement = await judgeReport(
-        content,
-        reportWeight,
-        postContent.content,
-      );
-      console.log("AI判定結果:", aiJudgement);
-    } catch (aiError) {
-      console.error("AI判定エラー:", aiError);
-      // AI判定が失敗しても報告は保存する
-    }
+    const aiJudgement = await judgeReport(
+      content,
+      reportWeight,
+      postContent.content,
+    );
+    console.log("AI判定結果:", aiJudgement);
 
     // 報告を保存
     const { data: report, error: insertError } = await supabase
