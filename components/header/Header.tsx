@@ -58,10 +58,12 @@ const Header = () => {
       </Link>
       <div className="md:ox flex items-center gap-4">
         {isMobile ? (
-          <MobileNavigation navItems={navItems} />
+          <>
+            <MobileNavigation navItems={navItems} />
+            <NotificationPopover />
+          </>
         ) : (
           <>
-            <NotificationPopover />
             <nav className="flex gap-6">
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
@@ -84,6 +86,8 @@ const Header = () => {
                 );
               })}
             </nav>
+
+            <NotificationPopover />
           </>
         )}
       </div>
