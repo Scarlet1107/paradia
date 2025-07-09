@@ -1,7 +1,13 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import { Home as HomeIcon, Megaphone, Crown, Settings } from "lucide-react";
+import {
+  Home as HomeIcon,
+  Info,
+  Megaphone,
+  Crown,
+  Settings,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -23,6 +29,11 @@ const navItems = [
     href: "/protected/ranking",
     icon: Crown,
     label: "ランキング",
+  },
+  {
+    href: "/protected/tutorials",
+    icon: Info,
+    label: "市民ガイド",
   },
   {
     href: "/protected/settings",
