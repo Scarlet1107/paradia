@@ -148,6 +148,18 @@ export async function POST(request: Request) {
         .update({ trust_score: newScore })
         .eq("id", user.id);
 
+      // 信頼度が減ったことをユーザーに通知する
+      const { error } = await supabase.from("notifications").insert([
+        {
+          recipient_id: user.id,
+          content: `Lv.${aiResult.negativity_level}の有害投稿が検出されました。\n信頼度${adjust < 0 ? "減少" : "上昇"}→${newScore}`,
+        },
+      ]);
+
+      if (error) {
+        console.error("通知の挿入失敗:", error);
+      }
+
       if (updateError) {
         console.error("信頼度更新失敗:", updateError);
         return NextResponse.json(

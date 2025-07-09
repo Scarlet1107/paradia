@@ -68,6 +68,7 @@ export default function PostComposer({ onPosted }: PostComposerProps) {
       setOpen(false);
       setContent("");
       onPosted();
+      router.refresh();
     } catch (err) {
       console.error("投稿中のエラー:", err);
       toast.error("投稿中にエラーが発生しました");
