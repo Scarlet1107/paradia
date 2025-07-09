@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 export default function DynamicBackground() {
   const pathName = usePathname();
   const isBadEnd = pathName ? pathName.endsWith("/delete-user") : false;
-  console.log("DynamicBackground pathName:", pathName, "isBadEnd:", isBadEnd);
 
   const renderBackground = () => {
     return isBadEnd ? (
