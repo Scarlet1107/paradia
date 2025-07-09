@@ -11,6 +11,7 @@ import { Badge } from "./ui/badge";
 import { useUser } from "@/context/UserContext";
 import ReportDialog from "@/components/ReportDialog";
 import ExpandableText from "./ExpandableText";
+import { useRouter } from "next/navigation";
 
 const DOT_COUNT = 8;
 const RADIUS = 24;
@@ -44,6 +45,7 @@ export default function Post({
   const [loading, setLoading] = useState(false);
   const [explode, setExplode] = useState(false);
   const { userId } = useUser();
+  const router = useRouter();
 
   const CitizenLevel = getCitizenLevel(trustScore);
 
@@ -79,6 +81,7 @@ export default function Post({
       setLiked(false);
       setLikeCount((c) => c - delta);
       toast.error("自分の投稿にはいいねできません！信頼度が1減少しました。");
+      router.refresh();
       setLoading(false);
       return;
     }
