@@ -46,7 +46,6 @@ export default async function ProtectedLayout({
   };
 
   // 4. 通知を取得
-  console.log("ユーザーの通知を取得中", user.id);
   const { data: initialNotifications, error } = await supabase
     .from("notifications")
     .select("id, content, is_read, created_at")
