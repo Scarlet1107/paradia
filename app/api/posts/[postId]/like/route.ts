@@ -38,7 +38,7 @@ export async function POST(
       // normal like: bump author’s trust_score by +1 (max 100)
       const { data: prof, error: profErr } = await supabase
         .from("profiles")
-        .select("trust_score")
+        .select("nickname, trust_score")
         .eq("id", post.author_id)
         .single();
       if (!profErr && prof?.trust_score != null) {
@@ -46,6 +46,17 @@ export async function POST(
           .from("profiles")
           .update({ trust_score: Math.min(100, prof.trust_score + 1) })
           .eq("id", post.author_id);
+
+        const { error: notificationError } = await supabase
+          .from("notifications")
+          .insert({
+            recipient_id: post.author_id,
+            content: `${prof?.nickname}さんがあなたの投稿にいいねをしました。\n 信頼度+1`,
+          });
+        if (notificationError) {
+          console.error("Failed to create notification:", notificationError);
+        }
+        return NextResponse.json({ success: true, selfLike: false });
       }
     }
   }

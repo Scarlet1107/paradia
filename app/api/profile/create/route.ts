@@ -39,6 +39,17 @@ export async function POST(req: Request) {
       if (updateErr) {
         console.error("Failed to decrement trust_score:", updateErr);
       }
+
+      const { error: notificationError } = await supabase
+        .from("notifications")
+        .insert({
+          recipient_id: user.id,
+          content:
+            "不適切なニックネームが検出されました。信頼度が5減少しました。",
+        });
+      if (notificationError) {
+        console.error("Failed to create notification:", notificationError);
+      }
     }
 
     return NextResponse.json({ ok: false, error: "不適切なニックネームです" });

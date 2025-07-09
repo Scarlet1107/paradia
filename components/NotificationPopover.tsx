@@ -96,7 +96,7 @@ export const NotificationPopover: React.FC = () => {
                         !note.is_read ? "bg-orange-100 font-semibold" : ""
                       }`}
                     >
-                      <span className="text-sm text-orange-800">
+                      <span className="text-sm whitespace-pre-wrap text-orange-800">
                         {note.content}
                       </span>
                       <time className="mt-1 text-xs text-orange-500">
