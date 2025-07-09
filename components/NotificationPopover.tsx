@@ -63,8 +63,8 @@ export const NotificationPopover: React.FC = () => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" className="relative cursor-pointer">
-          <Bell className="h-5 w-5 text-orange-600" />
+        <Button variant="ghost" className="relative cursor-pointer md:ml-3">
+          <Bell className="m-0 h-12 w-12 scale-125 p-0 text-orange-600" />
           {unreadCount > 0 && (
             <Badge className="absolute -top-1 -right-1 rounded-full bg-orange-600 text-white">
               {unreadCount}
@@ -72,7 +72,7 @@ export const NotificationPopover: React.FC = () => {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 rounded-2xl p-0">
+      <PopoverContent className="mr-2 w-71 rounded-2xl p-0">
         <Card className="border-orange-200">
           <CardHeader>
             <CardTitle className="text-orange-600">通知</CardTitle>
