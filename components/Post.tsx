@@ -50,14 +50,10 @@ export default function Post({
 
   // 権限チェック: 自分の投稿でない場合のみチェック
   const isOwnPost = userId === authorId;
-  console.log("isOwnPost:", isOwnPost);
-  console.log("visubilityLevel:", visubilityLevel);
-  console.log("CitizenLevel:", CitizenLevel);
   const hasPermission =
     isOwnPost ||
     !visubilityLevel ||
     CitizenLevel >= Number.parseInt(visubilityLevel);
-  console.log("hasPermission:", hasPermission);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
 
   const handleLike = async () => {
