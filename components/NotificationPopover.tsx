@@ -14,6 +14,7 @@ import { Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useNotifications } from "@/context/NotificationContext";
 import { useRouter } from "next/navigation";
+import { formatRelativeTime } from "@/lib/time";
 
 export interface Notification {
   id: string;
@@ -100,13 +101,7 @@ export const NotificationPopover: React.FC = () => {
                         {note.content}
                       </span>
                       <time className="mt-1 text-xs text-orange-500">
-                        {new Date(note.created_at).toLocaleString("ja-JP", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {formatRelativeTime(note.created_at)}
                       </time>
                     </li>
                   ))}
