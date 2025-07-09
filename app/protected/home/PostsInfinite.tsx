@@ -119,6 +119,7 @@ export default function PostsInfinite({
                   createdAt: post.created_at,
                 }}
                 authorId={post.author_id}
+                authorTrustScore={trustScore}
                 visubilityLevel={post.visibility_level}
                 author={nickname}
                 trustScore={trustScore}

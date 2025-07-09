@@ -142,7 +142,10 @@ export async function POST(request: Request) {
         );
       }
 
-      const newScore = profileData.trust_score + adjust;
+      const newScore = Math.max(
+        0,
+        Math.min(100, profileData.trust_score + adjust),
+      );
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ trust_score: newScore })

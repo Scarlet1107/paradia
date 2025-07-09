@@ -43,43 +43,40 @@ const DeleteUserDialog = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-red-50">
+    <div className="flex min-h-screen items-center justify-center bg-black">
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent
-          className="max-w-md"
+          className="max-w-md border-2 border-white bg-black"
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <AlertDialogHeader>
-            <div className="mx-auto mb-4 flex h-32 w-32 items-center justify-center rounded-full bg-red-100">
+            <div className="mx-auto mb-4 flex h-32 w-32 items-center justify-center rounded-full bg-red-600">
               <Image
                 src="/angry_eye.png"
                 alt="怒った顔"
                 width={128}
                 height={128}
-                className="text-red-600"
+                className="text-white"
               />
             </div>
-            <AlertDialogTitle className="text-center text-2xl font-bold text-red-600">
+            <AlertDialogTitle className="text-center text-2xl font-bold text-red-500">
               アカウント削除通知
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-center text-gray-600">
+            <AlertDialogDescription className="text-center text-white">
               あなたの信頼スコアが規定値を下回りました
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <div className="space-y-4">
-            <div className="rounded-lg bg-gray-50 p-4 text-center">
-              <div className="mb-2 text-sm text-gray-600">現在の信頼スコア</div>
-              <div className="text-3xl font-bold text-red-600">0</div>
-              <div className="mt-1 text-sm text-gray-500">規定値: 1以上</div>
+            <div className="mt-2 rounded-lg bg-red-900 p-4 text-center">
+              <div className="mb-2 text-sm text-white">現在の信頼スコア</div>
+              <div className="text-3xl font-bold text-red-500">0</div>
+              <div className="mt-1 text-sm text-white">規定値: 1以上</div>
             </div>
 
-            <div className="text-center text-gray-700">
-              <p className="mb-3">
+            <div className="text-center">
+              <p className="mb-3 text-sm text-white">
                 システムの安全性を保つため、あなたのアカウントを削除する必要があります。
-              </p>
-              <p className="text-sm text-gray-500">
-                この操作は取り消すことができません。
               </p>
             </div>
           </div>
@@ -87,13 +84,13 @@ const DeleteUserDialog = () => {
           <AlertDialogFooter className="flex flex-col gap-2 sm:flex-col">
             <AlertDialogAction
               onClick={onDelete}
-              className="w-full bg-red-600 py-3 font-bold text-white hover:bg-red-700"
+              className="mt-2 w-full bg-red-500 py-3 font-bold text-white hover:bg-red-600"
             >
               アカウントを削除する
             </AlertDialogAction>
-            <div className="text-center text-xs text-gray-400">
-              ご不明な点がございましたら、管理者までお問い合わせください。
-            </div>
+            <p className="text-center text-xs text-white/80">
+              ※ この判断はオルディナ様が行ったもので、異議申し立てはできません。
+            </p>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

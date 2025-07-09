@@ -34,7 +34,7 @@ interface PostProps {
   authorId: string;
   visubilityLevel?: "1" | "2" | "3" | "4" | "5" | null;
   author: string;
-  trustScore: number;
+  authorTrustScore: number;
   initialLikeCount: number;
   initialLiked: boolean;
   initialReportCount?: number;
@@ -46,7 +46,7 @@ export default function Post({
   authorId,
   visubilityLevel,
   author,
-  trustScore,
+  authorTrustScore,
   initialLikeCount,
   initialLiked,
   initialReportCount = 0,
@@ -59,13 +59,13 @@ export default function Post({
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [explode, setExplode] = useState(false);
-  const { userId } = useUser();
+  const { userId, trustScore: userTrustScore } = useUser();
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
 
-  const CitizenLevel = getCitizenLevel(trustScore);
+  const CitizenLevel = getCitizenLevel(userTrustScore);
 
   // 権限チェック: 自分の投稿でない場合のみチェック
   const isOwnPost = userId === authorId;
@@ -124,36 +124,7 @@ export default function Post({
     return { angle, idx: i };
   });
 
-  const formatRelativeTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-
-    // 24時間以内の場合は相対時間表記
-    if (diffInMs < 24 * 60 * 60 * 1000) {
-      if (diffInMinutes < 1) {
-        return "たった今";
-      } else if (diffInMinutes < 60) {
-        return `${diffInMinutes}分前`;
-      } else {
-        return `${diffInHours}時間前`;
-      }
-    }
-
-    // 24時間を超える場合は日時表記
-    return new Intl.DateTimeFormat("ja-JP", {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: false,
-    }).format(date);
-  };
-
-  const citizenBadgeUrl = getBadgeUrlFromScore(trustScore);
+  const citizenBadgeUrl = getBadgeUrlFromScore(authorTrustScore);
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-orange-500 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
