@@ -48,7 +48,7 @@ export default async function RankingPage() {
   });
 
   return (
-    <div className="relative min-h-screen overflow-hidden rounded-3xl bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <div className="relative mx-2 min-h-screen overflow-hidden rounded-3xl bg-gradient-to-br from-gray-50 via-white to-gray-100 lg:mx-0">
       {/* Enhanced background effects with more layers */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-300/30 via-orange-200/40 to-orange-100/30 blur-3xl"></div>
       <div className="absolute top-1/4 left-1/4 h-96 w-96 animate-pulse rounded-full bg-gradient-to-r from-orange-400/40 to-orange-500/50 blur-3xl"></div>
