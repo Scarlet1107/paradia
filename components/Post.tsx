@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Heart, UserX, Lock, Edit, Trash2 } from "lucide-react";
+import { Heart, UserX, Lock, Edit, Trash2, Ellipsis } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { getBadgeUrlFromScore, getCitizenLevel } from "@/lib/trust";
@@ -139,7 +139,7 @@ export default function Post({
                 size="sm"
                 className="h-8 w-8 rounded-full border border-orange-200/50 bg-gradient-to-r from-orange-100/80 to-orange-200/80 p-0 text-orange-600 shadow-sm backdrop-blur-sm transition-all duration-200 hover:border-orange-300/70 hover:from-orange-200/90 hover:to-orange-300/90 hover:text-orange-700 hover:shadow-md"
               >
-                <MoreVertical className="h-4 w-4" />
+                <Ellipsis className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
