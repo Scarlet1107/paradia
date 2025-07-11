@@ -218,7 +218,7 @@ export async function POST(request: Request) {
     if (aiJudgement.action_recommendation === "reject") {
       const newTrustScore = Math.max(
         0,
-        reporterTrustScore + aiJudgement.judgement_score,
+        reporterTrustScore - aiJudgement.judgement_score,
       );
       await supabase
         .from("profiles")
@@ -242,6 +242,12 @@ export async function POST(request: Request) {
         .from("posts")
         .update({ content: aiJudgement.post_content })
         .eq("id", postId);
+
+      await supabase.from("notifications").insert({
+        recipient_id: postData.author_id,
+        content: `あなたの投稿が報告されました。報告理由: ${reason.trim()} \n あなたの信頼度が${aiJudgement.judgement_score * 2}減少しました。`,
+        is_read: false,
+      });
 
       console.log("投稿内容をAIによって更新:", aiJudgement.post_content);
     }
@@ -275,7 +281,7 @@ export async function POST(request: Request) {
       報告重み: ${reportWeight}, 
       累積報告重み: ${totalReportWeight}`);
 
-    await new Promise((resolve) => setTimeout(resolve, 10000));
+    //await new Promise((resolve) => setTimeout(resolve, 10000));
 
     return NextResponse.json({
       action_recommendation: aiJudgement.action_recommendation,
