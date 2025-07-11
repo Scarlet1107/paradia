@@ -25,7 +25,7 @@ export default async function HomePage() {
   }));
 
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full md:mb-24">
       <PostsInfinite pageSize={mappedPosts.length} initialPosts={mappedPosts} />
       <PostComposer />
       <TrustScoreValue />
