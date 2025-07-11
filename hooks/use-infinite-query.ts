@@ -109,7 +109,12 @@ function createStore<
     } = await query.range(skip, skip + pageSize - 1);
 
     if (error) {
-      console.error("An unexpected error occurred:", error);
+      console.error(
+        "❌ Supabase error:",
+        error.message,
+        error.details,
+        error.hint,
+      );
       setState({ error });
     } else {
       const deduplicatedData = (

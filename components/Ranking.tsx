@@ -73,21 +73,6 @@ const getRankIcon = (index: number) => {
   }
 };
 
-const getRankBadge = () => {
-  // Just the badge image without text
-  return (
-    <div className="relative h-8 w-8">
-      <Image
-        src="/badges/level1.png"
-        alt="ランクバッジ"
-        width={32}
-        height={32}
-        className="h-full w-full object-contain"
-      />
-    </div>
-  );
-};
-
 export default function Ranking({
   initialData,
 }: {
@@ -184,7 +169,7 @@ export default function Ranking({
             {/* Border decoration */}
             <div className="absolute inset-2 rounded-b-xl border border-orange-300/30"></div>
 
-            <div className="relative z-10 p-6 sm:p-8">
+            <div className="relative z-10 p-2">
               {/* Table */}
               <div className="overflow-hidden rounded-xl border border-orange-200 bg-gradient-to-br from-white/80 to-orange-50/80 shadow-inner">
                 {/* Table Header */}

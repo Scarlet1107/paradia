@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     if (fetchErr || profile == null) {
       console.error("Failed to fetch trust_score:", fetchErr);
     } else {
-      const newScore = profile.trust_score - 5; // 信頼度を5減少
+      const newScore = Math.max(0, Math.min(100, profile.trust_score - 5)); // 信頼度を5減少し、0以上100以下に制限
       const { error: updateErr } = await supabase
         .from("profiles")
         .update({ trust_score: newScore })

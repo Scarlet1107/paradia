@@ -44,7 +44,7 @@ export default function SearchSortHeader({
       case "asc":
         return "古い順";
       case "most_liked":
-        return "いいねが多い順";
+        return "いいね順";
       default:
         return "新着順";
     }
@@ -100,10 +100,7 @@ export default function SearchSortHeader({
               className="flex items-center gap-2 rounded-lg border border-orange-200/50 bg-gradient-to-r from-white/80 to-gray-50/80 px-3 py-2 text-sm text-gray-700 shadow-sm transition-all duration-200 hover:border-orange-300/70 hover:from-orange-50 hover:to-amber-50 hover:text-amber-700 hover:shadow-md sm:px-4 sm:text-base"
             >
               <ArrowUpDown className="h-4 w-4 text-amber-600" />
-              <span className="hidden font-medium sm:inline">
-                {getSortLabel()}
-              </span>
-              <span className="font-medium sm:hidden">Sort</span>
+              <span className="font-medium sm:inline">{getSortLabel()}</span>
               {getSortIcon()}
             </Button>
           </DropdownMenuTrigger>
@@ -155,7 +152,7 @@ export default function SearchSortHeader({
             >
               <div className="flex items-center gap-2">
                 <Heart className="h-4 w-4 text-red-500" />
-                <span>いいねが多い順</span>
+                <span>いいね順</span>
               </div>
               {sortOrder === "most_liked" && (
                 <Heart className="ml-auto h-4 w-4 text-red-500" />
