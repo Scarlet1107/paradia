@@ -174,9 +174,7 @@ export default function Post({
                 {hasPermission ? author : "***"}
               </div>
               {userId === authorId && hasPermission && (
-                <Badge className="bg-orange-500 text-xs text-white">
-                  あなた
-                </Badge>
+                <Badge className="bg-orange-500 text-xs text-white">You</Badge>
               )}
             </div>
           </div>
