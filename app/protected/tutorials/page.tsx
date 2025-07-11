@@ -22,7 +22,7 @@ export default function Page() {
         <div className="absolute right-0 bottom-0 left-0 h-1 bg-orange-300"></div>
       </section>
 
-      <div className="container mx-auto space-y-16 px-4 py-12">
+      <div className="container mx-auto space-y-16 px-4">
         {/* パラディアとは */}
         <section className="relative">
           <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-xl md:p-12">
@@ -186,9 +186,6 @@ export default function Page() {
           </div>
         </section>
       </div>
-
-      {/* 下部スペース */}
-      <div className="h-24 md:h-0"></div>
     </div>
   );
 }
