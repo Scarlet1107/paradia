@@ -169,7 +169,7 @@ export default function Ranking({
             {/* Border decoration */}
             <div className="absolute inset-2 rounded-b-xl border border-orange-300/30"></div>
 
-            <div className="relative z-10 p-6 sm:p-8">
+            <div className="relative z-10 p-2">
               {/* Table */}
               <div className="overflow-hidden rounded-xl border border-orange-200 bg-gradient-to-br from-white/80 to-orange-50/80 shadow-inner">
                 {/* Table Header */}
@@ -180,7 +180,7 @@ export default function Ranking({
                         順位
                       </span>
                     </div>
-                    <div className="col-span-2 text-center sm:col-span-2">
+                    <div className="col-span-2 w-max text-center sm:col-span-2">
                       <span className="text-sm font-bold text-orange-800 sm:text-base">
                         バッジ
                       </span>
