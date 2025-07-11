@@ -26,6 +26,7 @@ interface PostWithLikes {
 
 interface PostsInfiniteProps {
   pageSize?: number;
+  initialPosts: PostWithLikes[];
 }
 
 type SortOrder = "desc" | "asc" | "most_liked";
@@ -33,6 +34,7 @@ type TableName = "posts" | "posts_with_like_counts";
 
 export default function PostsInfinite({
   pageSize = 10,
+  initialPosts,
 }: PostsInfiniteProps): React.JSX.Element {
   const { userId } = useUser();
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
@@ -44,12 +46,9 @@ export default function PostsInfinite({
   }, []);
 
   const useLikesSort = sortOrder === "most_liked";
-  const tableName: TableName = useLikesSort
-    ? "posts_with_like_counts"
-    : "posts";
-  const columns = useLikesSort
-    ? "id, content, author_id, visibility_level, created_at, like_count, likes(post_id, user_id), author:profiles(nickname, trust_score), reports(id)"
-    : "id, content, author_id, visibility_level, created_at, likes(post_id, user_id), author:profiles(nickname, trust_score), reports(id)";
+  const tableName: TableName = "posts_with_like_counts";
+  const columns =
+    "id, content, author_id, visibility_level, created_at, like_count, likes(post_id, user_id), author:profiles(nickname, trust_score), reports(id)";
   const sortColumn = useLikesSort ? "like_count" : "created_at";
   const ascending = sortOrder === "asc";
 
@@ -73,6 +72,8 @@ export default function PostsInfinite({
   //     );
   // }
 
+  const initialKey = initialPosts.map((p) => p.id).join(",");
+
   return (
     <div
       className="min-h-screen w-full"
@@ -89,21 +90,28 @@ export default function PostsInfinite({
 
       <div className="w-full" style={{ width: "100%", minWidth: "100%" }}>
         <InfiniteList<TableName>
-          key={`${sortOrder}-${searchQuery}`}
+          key={`${sortOrder}-${searchQuery}-${initialKey}`}
           tableName={tableName}
           columns={columns}
           pageSize={pageSize}
+          initialData={initialPosts}
           trailingQuery={(q) => {
             let builder = q as SupabaseSelectBuilder<TableName>;
             if (searchQuery) {
               builder = builder.ilike("content", `%${searchQuery}%`);
             }
-            return builder.order(sortColumn, { ascending });
+            // いいね順ソートのときは tie-breaker に created_at 降順 を追加
+            if (useLikesSort) {
+              return builder
+                .order("like_count", { ascending })
+                .order("created_at", { ascending: false });
+            } else {
+              // 通常の作成日時ソート（asc/desc）
+              return builder.order("created_at", { ascending });
+            }
           }}
           renderItem={(post: PostWithLikes) => {
-            const likeCount = useLikesSort
-              ? (post.like_count ?? 0)
-              : (post.likes?.length ?? 0);
+            const likeCount = post.like_count ?? 0;
             const reportCount = post.reports?.length ?? 0;
             const initialLiked =
               post.likes?.some((l) => l.user_id === userId) ?? false;

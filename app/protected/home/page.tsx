@@ -1,21 +1,33 @@
 // app/protected/home/page.tsx
-"use client";
 import PostsInfinite from "@/app/protected/home/PostsInfinite";
 import PostComposer from "@/components/PostComposer";
 import TrustScoreValue from "@/components/TrustScoreValue";
-import { useState } from "react";
+import { createClient } from "@/lib/supabase/server";
+export default async function HomePage() {
+  const supabase = await createClient();
 
-export default function HomePage() {
-  const [refreshKey, setRefreshKey] = useState(0);
+  // 初回10件をサーバーで取得
+  const { data: initialPosts } = await supabase
+    .from("posts_with_like_counts")
+    .select(
+      `id, content, author_id, visibility_level, created_at, like_count, likes(post_id, user_id), author:profiles(nickname, trust_score), reports(id)`,
+    )
+    .order("created_at", { ascending: false })
+    .limit(10);
+  if (!initialPosts) {
+    return <div className="p-4">投稿が見つかりませんでした</div>;
+  }
 
-  // とても悲しい実装であることは重々承知であります;; - shogo
-  const handleNewPost = () => {
-    setRefreshKey((prev) => prev + 1);
-  };
+  // Map author from array to single object
+  const mappedPosts = initialPosts.map((post) => ({
+    ...post,
+    author: Array.isArray(post.author) ? post.author[0] : post.author,
+  }));
+
   return (
-    <div className="min-h-screen w-full">
-      <PostsInfinite key={refreshKey} />
-      <PostComposer onPosted={handleNewPost} />
+    <div className="min-h-screen w-full md:mb-24">
+      <PostsInfinite pageSize={mappedPosts.length} initialPosts={mappedPosts} />
+      <PostComposer />
       <TrustScoreValue />
     </div>
   );

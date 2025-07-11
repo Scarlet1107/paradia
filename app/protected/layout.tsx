@@ -60,7 +60,7 @@ export default async function ProtectedLayout({
     <UserProvider profile={profile}>
       <NotificationProvider notifications={initialNotifications || []}>
         <Header />
-        <main className="flex max-w-5xl flex-1 flex-col gap-20 pt-5">
+        <main className="mb-24 flex max-w-5xl flex-1 flex-col gap-20 py-5 md:mb-0">
           {children}
         </main>
       </NotificationProvider>
