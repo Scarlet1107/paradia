@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
+import { formatRelativeTime } from "@/lib/time";
 
 interface Announcement {
   id: number;
@@ -18,29 +19,6 @@ interface AnimatedBulletinBoardProps {
 export function AnimatedBulletinBoard({
   announcements,
 }: AnimatedBulletinBoardProps) {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString("ja-JP", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const getTimeAgo = (dateString: string) => {
-    const now = new Date();
-    const date = new Date(dateString);
-    const diffInMinutes = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60),
-    );
-    if (diffInMinutes < 1) return "たった今";
-    if (diffInMinutes < 60) return `${diffInMinutes}分前`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}時間前`;
-    return `${Math.floor(diffInMinutes / 1440)}日前`;
-  };
-
   return (
     <motion.div
       className="overflow-hidden rounded-xl border-2 border-orange-300 bg-white shadow-xl"
@@ -103,7 +81,7 @@ export function AnimatedBulletinBoard({
                       >
                         <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                         <span className="font-medium">
-                          {getTimeAgo(announcement.created_at)}
+                          {formatRelativeTime(announcement.created_at)}
                         </span>
                       </motion.div>
                     </div>
@@ -123,7 +101,7 @@ export function AnimatedBulletinBoard({
                       whileInView={{ opacity: 1 }}
                       transition={{ delay: index * 0.1 + 0.4 }}
                     >
-                      投稿日時: {formatDate(announcement.created_at)}
+                      投稿日時: {formatRelativeTime(announcement.created_at)}
                     </motion.div>
                   </CardContent>
                 </Card>
