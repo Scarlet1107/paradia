@@ -180,7 +180,7 @@ export default function Ranking({
                         順位
                       </span>
                     </div>
-                    <div className="col-span-2 w-max text-center sm:col-span-2">
+                    <div className="col-span-2 text-center sm:col-span-2">
                       <span className="text-sm font-bold text-orange-800 sm:text-base">
                         バッジ
                       </span>
