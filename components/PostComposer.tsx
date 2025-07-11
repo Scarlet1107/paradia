@@ -16,11 +16,7 @@ import { Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
-interface PostComposerProps {
-  onPosted: () => void;
-}
-
-export default function PostComposer({ onPosted }: PostComposerProps) {
+export default function PostComposer() {
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
@@ -67,7 +63,6 @@ export default function PostComposer({ onPosted }: PostComposerProps) {
 
       setOpen(false);
       setContent("");
-      onPosted();
       router.refresh();
     } catch (err) {
       console.error("投稿中のエラー:", err);

@@ -18,10 +18,10 @@ interface InfiniteListProps<TableName extends SupabaseTableName> {
     item: SupabaseTableData<TableName>,
     index: number,
   ) => React.ReactNode;
-  className?: string;
   renderNoResults?: () => React.ReactNode;
   renderEndMessage?: () => React.ReactNode;
-  renderSkeleton?: (count: number) => React.ReactNode;
+  /** サーバーから渡された初期データ */
+  initialData: SupabaseTableData<TableName>[];
 }
 
 const DefaultNoResults = () => (
@@ -44,45 +44,60 @@ export function InfiniteList<TableName extends SupabaseTableName>({
   renderItem,
   renderNoResults = DefaultNoResults,
   renderEndMessage = DefaultEndMessage,
+  initialData, // ← 必須化
 }: InfiniteListProps<TableName>) {
-  const { data, isFetching, hasMore, fetchNextPage, isSuccess } =
-    useInfiniteQuery({
-      tableName,
-      columns,
-      pageSize,
-      trailingQuery,
-    });
+  // ① クライアントからのページネーション結果
+  const {
+    data: clientRows,
+    isFetching,
+    hasMore,
+    fetchNextPage,
+    isSuccess,
+  } = useInfiniteQuery({
+    tableName,
+    columns,
+    pageSize,
+    trailingQuery,
+  });
 
-  const sentinelRef = React.useRef<HTMLDivElement>(null);
+  // ② 表示するデータを state で管理
+  const [displayRows, setDisplayRows] = React.useState(initialData);
 
+  // ③ initialData が変わったら、まずはこれを優先して表示
   React.useEffect(() => {
-    const observer = new IntersectionObserver(
+    setDisplayRows(initialData);
+  }, [initialData]);
+
+  // ④ clientRows が入ってきたら、こちらを優先して表示
+  React.useEffect(() => {
+    if (clientRows.length > 0) {
+      setDisplayRows(clientRows);
+    }
+  }, [clientRows]);
+
+  // ⑤ IntersectionObserver はそのまま
+  const sentinelRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const obs = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isFetching) {
           fetchNextPage();
         }
       },
-      {
-        root: null,
-        threshold: 0.1,
-        rootMargin: "0px 0px 100px 0px",
-      },
+      { root: null, threshold: 0.1, rootMargin: "0px 0px 100px 0px" },
     );
-    if (sentinelRef.current) observer.observe(sentinelRef.current);
-    return () => observer.disconnect();
-  }, [isFetching, hasMore, fetchNextPage]);
+    if (sentinelRef.current) obs.observe(sentinelRef.current);
+    return () => obs.disconnect();
+  }, [hasMore, isFetching, fetchNextPage]);
 
   return (
-    <div
-      className="flex w-full flex-col gap-4 p-4"
-      style={{ width: "100%", minWidth: "100%", maxWidth: "100%" }}
-    >
-      {isSuccess && data.length === 0 && renderNoResults()}
+    <div className="flex w-full flex-col gap-4 p-4">
+      {isSuccess && displayRows.length === 0 && renderNoResults()}
 
-      <div className="w-full space-y-4" style={{ width: "100%" }}>
-        {data.map((item, index) => (
-          <div key={index} className="w-full" style={{ width: "100%" }}>
-            {renderItem(item, index)}
+      <div className="w-full space-y-4">
+        {displayRows.map((item, idx) => (
+          <div key={idx} className="w-full">
+            {renderItem(item, idx)}
           </div>
         ))}
       </div>
@@ -95,7 +110,7 @@ export function InfiniteList<TableName extends SupabaseTableName>({
 
       <div ref={sentinelRef} style={{ height: "1px" }} />
 
-      {!hasMore && data.length > 0 && renderEndMessage()}
+      {!hasMore && displayRows.length > 0 && renderEndMessage()}
     </div>
   );
 }
