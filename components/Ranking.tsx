@@ -73,21 +73,6 @@ const getRankIcon = (index: number) => {
   }
 };
 
-const getRankBadge = () => {
-  // Just the badge image without text
-  return (
-    <div className="relative h-8 w-8">
-      <Image
-        src="/badges/level1.png"
-        alt="ランクバッジ"
-        width={32}
-        height={32}
-        className="h-full w-full object-contain"
-      />
-    </div>
-  );
-};
-
 export default function Ranking({
   initialData,
 }: {

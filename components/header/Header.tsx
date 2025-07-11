@@ -61,7 +61,7 @@ const Header = () => {
                   )}
                 >
                   <Icon className="mr-2 h-5 w-5" />
-                  {item.label}
+                  <span className="hidden lg:block">{item.label}</span>
                 </Link>
               );
             })}
