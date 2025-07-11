@@ -35,7 +35,6 @@ export function AnimatedBulletinBoard({
     const diffInMinutes = Math.floor(
       (now.getTime() - date.getTime()) / (1000 * 60),
     );
-
     if (diffInMinutes < 1) return "たった今";
     if (diffInMinutes < 60) return `${diffInMinutes}分前`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}時間前`;
@@ -51,12 +50,14 @@ export function AnimatedBulletinBoard({
       transition={{ duration: 0.8, ease: "easeOut" }}
     >
       {/* 掲示板ヘッダー */}
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-white">
-        <div className="flex items-center gap-3">
-          <MessageSquare className="h-8 w-8" />
-          <div>
-            <h2 className="text-3xl font-bold">リアルタイム掲示板</h2>
-            <p className="mt-1 text-orange-100">
+      <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4 text-white sm:p-6">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+          <MessageSquare className="h-6 w-6 sm:h-8 sm:w-8" />
+          <div className="flex-1">
+            <h2 className="text-xl font-bold sm:text-2xl lg:text-3xl">
+              リアルタイム掲示板
+            </h2>
+            <p className="mt-1 text-sm text-orange-100 sm:text-base">
               最新のお知らせとコミュニティ情報
             </p>
           </div>
@@ -64,9 +65,9 @@ export function AnimatedBulletinBoard({
       </div>
 
       {/* 掲示板コンテンツ */}
-      <div className="p-6">
+      <div className="p-3 sm:p-6">
         {announcements.length ? (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {announcements.map((announcement, index) => (
               <motion.div
                 key={announcement.id}
@@ -87,29 +88,29 @@ export function AnimatedBulletinBoard({
                   }`}
                 >
                   <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <Badge
                         variant="secondary"
-                        className="bg-orange-200 text-orange-800"
+                        className="w-fit bg-orange-200 text-orange-800"
                       >
-                        お知らせ #{announcement.id}
+                        お知らせ #{String(announcement.id).split("-")[0]}
                       </Badge>
                       <motion.div
-                        className="flex items-center gap-2 text-sm text-gray-500"
+                        className="flex items-center gap-2 text-xs text-gray-500 sm:text-sm"
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         transition={{ delay: index * 0.1 + 0.3 }}
                       >
-                        <Clock className="h-4 w-4" />
+                        <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                         <span className="font-medium">
                           {getTimeAgo(announcement.created_at)}
                         </span>
                       </motion.div>
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-0">
                     <motion.p
-                      className="mb-3 leading-relaxed text-gray-800"
+                      className="mb-2 text-sm leading-relaxed text-gray-800 sm:mb-3 sm:text-base"
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 + 0.2 }}
@@ -131,17 +132,17 @@ export function AnimatedBulletinBoard({
           </div>
         ) : (
           <motion.div
-            className="py-12 text-center"
+            className="py-8 text-center sm:py-12"
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <MessageSquare className="mx-auto mb-4 h-16 w-16 text-gray-300" />
-            <p className="mb-2 text-lg text-gray-500">
+            <MessageSquare className="mx-auto mb-4 h-12 w-12 text-gray-300 sm:h-16 sm:w-16" />
+            <p className="mb-2 text-base text-gray-500 sm:text-lg">
               現在、秩序は完全に保たれております。
             </p>
-            <p className="text-sm text-gray-400">
+            <p className="text-xs text-gray-400 sm:text-sm">
               新しいお知らせをお待ちください
             </p>
           </motion.div>
