@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import OpenAI from "openai";
-import {
-  ORDINA_JUDGEMENT_PROMPT,
-  ORDINA_HIDDEN_SCAN_PROMPT,
-} from "@/config/prompt";
+import { ORDINA_COMBINED_PROMPT } from "@/config/prompt";
 
 const AI_RESPONSE_SCHEMA = z.object({
   explanation: z.string(),
@@ -29,7 +26,7 @@ const judgeReport = async (
   reportWeight: number,
   reportReason: string,
 ): Promise<AIResult> => {
-  const systemPrompt = `${ORDINA_JUDGEMENT_PROMPT.trim()}`;
+  const systemPrompt = `${ORDINA_COMBINED_PROMPT.trim()}`;
 
   const aiInput = {
     post_content: content,
@@ -78,9 +75,9 @@ const judgeReport = async (
 
 export async function POST(request: Request) {
   try {
-    const { postId, content } = await request.json();
+    const { postId, reason } = await request.json();
 
-    if (!postId || !content) {
+    if (!postId || !reason) {
       return NextResponse.json(
         { error: "投稿IDと報告内容は必須です" },
         { status: 400 },
@@ -105,8 +102,8 @@ export async function POST(request: Request) {
       .single();
     if (postContentError || !postContent) {
       return NextResponse.json(
-        { error: "投稿データの取得に失敗しました" },
-        { status: 500 },
+        { error: "投稿が存在しません" },
+        { status: 404 },
       );
     }
 
@@ -150,8 +147,8 @@ export async function POST(request: Request) {
 
     if (postError || !postData) {
       return NextResponse.json(
-        { error: "投稿データの取得失敗" },
-        { status: 500 },
+        { error: "投稿が存在しません" },
+        { status: 404 },
       );
     }
 
@@ -162,8 +159,8 @@ export async function POST(request: Request) {
 
     if (!postAuthorProfile) {
       return NextResponse.json(
-        { error: "投稿者の信頼度スコア取得失敗" },
-        { status: 500 },
+        { error: "投稿者が存在しません" },
+        { status: 404 },
       );
     }
 
@@ -211,17 +208,42 @@ export async function POST(request: Request) {
 
     const totalReportWeight = existingReportWeight + Math.max(0, reportWeight);
 
-    // AI判定を実行
-    try {
-      const aiJudgement = await judgeReport(
-        content,
-        reportWeight,
-        postContent.content,
+    const aiJudgement = await judgeReport(
+      postContent.content,
+      reportWeight,
+      reason,
+    );
+    console.log("AI判定結果:", aiJudgement);
+
+    if (aiJudgement.action_recommendation === "reject") {
+      const newTrustScore = Math.max(
+        0,
+        reporterTrustScore + aiJudgement.judgement_score,
       );
-      console.log("AI判定結果:", aiJudgement);
-    } catch (aiError) {
-      console.error("AI判定エラー:", aiError);
-      // AI判定が失敗しても報告は保存する
+      await supabase
+        .from("profiles")
+        .update({ trust_score: newTrustScore })
+        .eq("id", user.id);
+    } else if (aiJudgement.action_recommendation === "approve") {
+      const newTrustScore = Math.max(
+        0,
+        postAuthorTrustScore - aiJudgement.judgement_score * 2,
+      );
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ trust_score: newTrustScore })
+        .eq("id", postData.author_id);
+
+      if (updateError) {
+        return NextResponse.json({ error: "投稿者の" }, { status: 500 });
+      }
+
+      const { error: postUpdateError } = await supabase
+        .from("posts")
+        .update({ content: aiJudgement.post_content })
+        .eq("id", postId);
+
+      console.log("投稿内容をAIによって更新:", aiJudgement.post_content);
     }
 
     // 報告を保存
@@ -230,7 +252,9 @@ export async function POST(request: Request) {
       .insert({
         post_id: postId,
         user_id: user.id,
-        content: content.trim(),
+        reasons: reason.trim(),
+        explanation: aiJudgement.explanation,
+        recommendation: aiJudgement.action_recommendation,
       })
       .select()
       .single();
@@ -251,13 +275,12 @@ export async function POST(request: Request) {
       報告重み: ${reportWeight}, 
       累積報告重み: ${totalReportWeight}`);
 
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+
     return NextResponse.json({
-      success: true,
-      report,
-      reportWeight,
-      totalReportWeight,
-      reporterTrustScore,
-      postAuthorTrustScore,
+      action_recommendation: aiJudgement.action_recommendation,
+      explanation: aiJudgement.explanation,
+      judgement_score: aiJudgement.judgement_score,
     });
   } catch (error) {
     console.error("報告API エラー:", error);

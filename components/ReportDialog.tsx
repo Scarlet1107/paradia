@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 interface ReportDialogProps {
   open: boolean;
@@ -39,6 +40,7 @@ export default function ReportDialog({
   const [selectedReason, setSelectedReason] = useState("");
   const [customReason, setCustomReason] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async () => {
     const reason = selectedReason === "その他" ? customReason : selectedReason;
@@ -49,6 +51,9 @@ export default function ReportDialog({
     }
 
     setLoading(true);
+    setSelectedReason("");
+    setCustomReason("");
+    onOpenChange(false);
 
     try {
       const res = await fetch("/api/posts/report", {
@@ -57,7 +62,7 @@ export default function ReportDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           postId,
-          content: reason,
+          reason: reason,
         }),
       });
 
@@ -73,12 +78,10 @@ export default function ReportDialog({
       }
 
       toast.success("報告を送信しました");
-      onOpenChange(false);
+
       onReportSubmitted?.();
 
-      // フォームをリセット
-      setSelectedReason("");
-      setCustomReason("");
+      router.refresh();
     } catch (error) {
       console.error("報告送信エラー:", error);
       toast.error("報告の送信中にエラーが発生しました");
