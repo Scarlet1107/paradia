@@ -502,7 +502,7 @@ export async function POST(request: Request) {
       );
     }
 
-    //await new Promise((resolve) => setTimeout(resolve, 10000));
+    await new Promise((resolve) => setTimeout(resolve, 10000));
 
     return NextResponse.json({
       action_recommendation: aiJudgement.action_recommendation,
