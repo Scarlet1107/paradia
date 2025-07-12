@@ -539,34 +539,35 @@ export default function Post({
       {showReplies && !isReply && (
         <div className="mt-3 border-t border-orange-200/50 pt-3">
           <div className="space-y-3">
-            {replies.map((r) => (
-              <Post
-                key={r.id}
-                variant="reply"
-                post={{
-                  id: r.id,
-                  content: r.content,
-                  createdAt: r.created_at,
-                }}
-                authorId={r.author_id}
-                author={r.author.nickname}
-                authorTrustScore={r.author.trust_score}
-                initialLikeCount={r.like_count}
-                initialLiked={r.liked}
-                initialReportCount={r.reports?.length ?? 0}
-                reply_count={r.reply_count ?? 0}
-                parent_id={r.parent_id ?? post.id}
-                onLikeUpdate={(newCount, isLiked) => {
-                  setReplies((prev) =>
-                    prev.map((x) =>
-                      x.id === r.id
-                        ? { ...x, like_count: newCount, liked: isLiked }
-                        : x,
-                    ),
-                  );
-                }}
-              />
-            ))}
+            {replies &&
+              replies.map((r) => (
+                <Post
+                  key={r.id}
+                  variant="reply"
+                  post={{
+                    id: r.id,
+                    content: r.content,
+                    createdAt: r.created_at,
+                  }}
+                  authorId={r.author_id}
+                  author={r.author?.nickname ?? "抹消済み市民"}
+                  authorTrustScore={r.author?.trust_score ?? 0}
+                  initialLikeCount={r.like_count}
+                  initialLiked={r.liked}
+                  initialReportCount={r.reports?.length ?? 0}
+                  reply_count={r.reply_count ?? 0}
+                  parent_id={r.parent_id ?? post.id}
+                  onLikeUpdate={(newCount, isLiked) => {
+                    setReplies((prev) =>
+                      prev.map((x) =>
+                        x.id === r.id
+                          ? { ...x, like_count: newCount, liked: isLiked }
+                          : x,
+                      ),
+                    );
+                  }}
+                />
+              ))}
 
             <div className="rounded-lg border-2 border-dashed border-orange-200/60 bg-gradient-to-r from-orange-50/30 to-pink-50/20 p-3">
               <ReplyComposer parentId={post.id} onSuccess={loadReplies} />
