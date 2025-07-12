@@ -178,16 +178,6 @@ export default function Post({
     setLoading(false);
   }
 
-  function handleReplyLike(replyId: string) {
-    handleLike(replyId, (newCount, isLiked) => {
-      setReplies((all) =>
-        all.map((r) =>
-          r.id === replyId ? { ...r, like_count: newCount, liked: isLiked } : r,
-        ),
-      );
-    });
-  }
-
   const handleReportSubmitted = () => {
     setReportCount((prev) => prev + 1);
   };
