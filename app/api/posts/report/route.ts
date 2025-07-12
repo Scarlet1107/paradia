@@ -393,7 +393,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       action_recommendation: aiJudgement.action_recommendation,
       explanation: aiJudgement.explanation,
-      judgement_score: aiJudgement.judgement_score,
+      judgement_score: Math.abs(aiJudgement.judgement_score),
     });
   } catch (error) {
     console.error("報告API エラー:", error);

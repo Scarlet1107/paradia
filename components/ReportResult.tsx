@@ -9,12 +9,14 @@ type ReportStatus = "approve" | "reject" | "watch" | null;
 interface ReportResultProps {
   status: ReportStatus;
   explanation?: string;
+  trustScoreChange: number;
   onClose: () => void;
 }
 
 export default function ReportResult({
   status,
   explanation,
+  trustScoreChange,
   onClose,
 }: ReportResultProps) {
   if (!status) return null;
@@ -49,6 +51,16 @@ export default function ReportResult({
               投稿の修正・ユーザーへの警告
             </p>
           </div>
+          {trustScoreChange > 0 && (
+            <div className="rounded-lg border border-green-200 bg-green-50 p-3">
+              <p className="text-sm font-medium text-green-800">
+                信頼度スコア:
+              </p>
+              <p className="mt-1 text-sm text-green-700">
+                +{Math.round(trustScoreChange)}ポイント増加しました
+              </p>
+            </div>
+          )}
           <p className="text-sm text-green-600">
             コミュニティの安全にご協力いただき、ありがとうございます。
           </p>
@@ -93,6 +105,14 @@ export default function ReportResult({
               不適切な報告を繰り返すと、報告機能の利用が制限される場合があります。
             </p>
           </div>
+          {trustScoreChange < 0 && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+              <p className="text-sm font-medium text-red-800">信頼度スコア:</p>
+              <p className="mt-1 text-sm text-red-700">
+                {Math.round(trustScoreChange)}ポイント減少しました
+              </p>
+            </div>
+          )}
           <p className="text-sm text-amber-600">
             引き続き適切なご利用をお願いいたします。
           </p>
@@ -137,6 +157,14 @@ export default function ReportResult({
               継続的な監視と評価を行います
             </p>
           </div>
+          {trustScoreChange > 0 && (
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+              <p className="text-sm font-medium text-blue-800">信頼度スコア:</p>
+              <p className="mt-1 text-sm text-blue-700">
+                +{Math.round(trustScoreChange)}ポイント増加しました
+              </p>
+            </div>
+          )}
           <p className="text-sm text-blue-600">
             ご報告いただき、ありがとうございます。
           </p>

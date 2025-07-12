@@ -52,6 +52,7 @@ export default function ReportDialog({
   const [reportResult, setReportResult] = useState<{
     status: ReportStatus;
     explanation: string;
+    trustScoreChange: number;
   } | null>(null);
   const router = useRouter();
 
@@ -91,9 +92,21 @@ export default function ReportDialog({
 
       // ダイアログを閉じて結果を表示
       onOpenChange(false);
+
+      // 信頼度変化値を結果に応じて計算
+      let trustScoreChange = 0;
+      if (reportResponse.action_recommendation === "approve") {
+        trustScoreChange = Math.abs(reportResponse.judgement_score);
+      } else if (reportResponse.action_recommendation === "reject") {
+        trustScoreChange = -Math.abs(reportResponse.judgement_score);
+      } else if (reportResponse.action_recommendation === "watch") {
+        trustScoreChange = Math.abs(reportResponse.judgement_score) / 2;
+      }
+
       setReportResult({
         status: reportResponse.action_recommendation,
         explanation: reportResponse.explanation,
+        trustScoreChange: trustScoreChange,
       });
 
       // フォームをリセット
@@ -189,6 +202,7 @@ export default function ReportDialog({
           status={reportResult.status}
           explanation={reportResult.explanation}
           onClose={handleCloseResult}
+          trustScoreChange={reportResult.trustScoreChange} // 仮の信頼度変化値
         />
       )}
     </Dialog>
