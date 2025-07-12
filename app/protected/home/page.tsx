@@ -10,7 +10,7 @@ export default async function HomePage() {
   const { data: initialPosts } = await supabase
     .from("posts_with_like_counts")
     .select(
-      `id, content, author_id, visibility_level, created_at, like_count, likes(post_id, user_id), author:profiles(nickname, trust_score), reports(id), parent_id, reply_count`,
+      `id, content, author_id, visibility_level, created_at, like_count, likes(post_id, user_id), author:profiles(nickname, trust_score, created_at), reports(id), parent_id, reply_count`,
     )
     .is("parent_id", null)
     .order("created_at", { ascending: false })
