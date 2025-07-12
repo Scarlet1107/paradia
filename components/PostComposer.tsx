@@ -14,9 +14,16 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
 
-export default function PostComposer() {
+type PostComposerProps = {
+  parentId?: string;
+  onSuccess?: () => void;
+};
+
+export default function PostComposer({
+  parentId,
+  onSuccess,
+}: PostComposerProps) {
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
@@ -52,7 +59,7 @@ export default function PostComposer() {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, parentId }),
       });
 
       const json = await res.json().catch(() => null);
@@ -76,6 +83,7 @@ export default function PostComposer() {
 
       setOpen(false);
       setContent("");
+      onSuccess?.();
       router.refresh();
     } catch (err) {
       console.error("投稿中のエラー:", err);
