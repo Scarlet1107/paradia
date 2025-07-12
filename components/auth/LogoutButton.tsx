@@ -12,6 +12,7 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
+import { LogOut } from "lucide-react";
 
 export function LogoutButton() {
   const router = useRouter();
@@ -25,7 +26,13 @@ export function LogoutButton() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>ログアウト</Button>
+        <Button
+          variant="outline"
+          className="w-full border-2 border-orange-300 bg-transparent text-orange-700 shadow-md hover:bg-orange-100 hover:text-orange-800"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          ログアウト
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
