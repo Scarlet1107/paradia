@@ -76,11 +76,11 @@ export default function PostComposer() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         asChild
-        className="fixed right-5 bottom-20 h-14 w-14 cursor-pointer md:right-12 md:bottom-12 md:h-20 md:w-20"
+        className="fixed right-5 bottom-20 h-16 w-16 cursor-pointer md:right-12 md:bottom-12 md:h-20 md:w-20"
       >
         <Plus
           size={24}
-          className="h-14 w-14 rounded-full bg-orange-500 text-white shadow-lg transition hover:bg-orange-600"
+          className="h-16 w-16 rounded-full bg-orange-500 text-white shadow-lg transition hover:bg-orange-600"
         />
       </DialogTrigger>
 
