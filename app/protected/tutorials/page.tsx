@@ -49,7 +49,7 @@ export default function Page() {
                 <h2 className="font-serif text-2xl font-semibold tracking-wide text-orange-700 md:text-4xl lg:text-5xl">
                   平和な世界
                   <br className="mb-4 md:mb-0 md:hidden" />
-                  <span className="mx-3 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-2 font-bold tracking-wider text-white shadow-lg">
+                  <span className="mx-3 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 px-2 py-1 font-bold tracking-wider text-white shadow-lg md:px-4 md:py-2">
                     Paradia
                   </span>
                   へようこそ

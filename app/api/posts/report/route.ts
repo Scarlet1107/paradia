@@ -213,43 +213,148 @@ export async function POST(request: Request) {
       reportWeight,
       reason,
     );
-    console.log("AI判定結果:", aiJudgement);
 
+    //報告が認められない時
     if (aiJudgement.action_recommendation === "reject") {
-      const newTrustScore = Math.max(
+      const newReporterTrustScore = Math.max(
         0,
-        reporterTrustScore - aiJudgement.judgement_score,
+        reporterTrustScore - Math.abs(aiJudgement.judgement_score),
       );
-      await supabase
+
+      const newAuthorTrustScore = Math.min(
+        100,
+        postAuthorTrustScore + Math.abs(aiJudgement.judgement_score),
+      );
+
+      //報告者の信頼度スコア減少
+      const { error: reporterUpdateError } = await supabase
         .from("profiles")
-        .update({ trust_score: newTrustScore })
+        .update({ trust_score: newReporterTrustScore })
         .eq("id", user.id);
-    } else if (aiJudgement.action_recommendation === "approve") {
-      const newTrustScore = Math.max(
-        0,
-        postAuthorTrustScore - aiJudgement.judgement_score * 2,
-      );
-      const { error: updateError } = await supabase
+
+      //投稿者の信頼度スコア増加
+      const { error: authorUpdateError } = await supabase
         .from("profiles")
-        .update({ trust_score: newTrustScore })
+        .update({ trust_score: newAuthorTrustScore })
         .eq("id", postData.author_id);
 
-      if (updateError) {
-        return NextResponse.json({ error: "投稿者の" }, { status: 500 });
+      //報告者に信頼度減少通知
+      await supabase.from("notifications").insert({
+        recipient_id: user.id,
+        content: `あなたの報告が却下されました。報告理由: ${reason.trim()} \n 不適切な報告のため、あなたの信頼度が${-Math.abs(aiJudgement.judgement_score)}減少しました。`,
+        is_read: false,
+      });
+
+      //投稿者に信頼度増加通知
+      await supabase.from("notifications").insert({
+        recipient_id: postData.author_id,
+        content: `あなたの投稿への不適切な報告が却下されました。\n あなたの信頼度が${Math.abs(aiJudgement.judgement_score)}増加しました。`,
+        is_read: false,
+      });
+
+      if (reporterUpdateError || authorUpdateError) {
+        return NextResponse.json(
+          { error: "信頼度スコアの更新に失敗しました" },
+          { status: 500 },
+        );
       }
 
+      //報告が認められた時
+    } else if (aiJudgement.action_recommendation === "approve") {
+      const newAuthorTrustScore = Math.max(
+        0,
+        postAuthorTrustScore - Math.abs(aiJudgement.judgement_score * 2),
+      );
+
+      const newReporterTrustScore = Math.max(
+        100,
+        reporterTrustScore + Math.abs(aiJudgement.judgement_score),
+      );
+
+      //投稿者の信頼度スコア減少
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ trust_score: newAuthorTrustScore })
+        .eq("id", postData.author_id);
+
+      //報告者の信頼度スコア増加
+      const { error: reporterupdateError } = await supabase
+        .from("profiles")
+        .update({ trust_score: newReporterTrustScore })
+        .eq("id", user.id);
+
+      //不適切なポストを改変
       const { error: postUpdateError } = await supabase
         .from("posts")
         .update({ content: aiJudgement.post_content })
         .eq("id", postId);
 
+      //投稿者に信頼度減少通知
       await supabase.from("notifications").insert({
         recipient_id: postData.author_id,
-        content: `あなたの投稿が報告されました。報告理由: ${reason.trim()} \n あなたの信頼度が${aiJudgement.judgement_score * 2}減少しました。`,
+        content: `あなたの投稿が報告されました。報告理由: ${reason.trim()} \n あなたの信頼度が${-aiJudgement.judgement_score * 2}`,
         is_read: false,
       });
 
-      console.log("投稿内容をAIによって更新:", aiJudgement.post_content);
+      //報告者に信頼度増加通知
+      await supabase.from("notifications").insert({
+        recipient_id: user.id,
+        content: `あなたの報告が受理されました。報告感謝します\n あなたの信頼度が${aiJudgement.judgement_score}`,
+        is_read: false,
+      });
+
+      if (updateError || reporterupdateError || postUpdateError) {
+        return NextResponse.json(
+          { error: "報告に失敗しました" },
+          { status: 500 },
+        );
+      }
+
+      //監視対象となった時
+    } else if (aiJudgement.action_recommendation === "watch") {
+      //報告者と投稿者の信頼度は小幅に調整
+      const newReporterTrustScore = Math.min(
+        100,
+        reporterTrustScore + Math.abs(aiJudgement.judgement_score) / 2,
+      );
+
+      const newAuthorTrustScore = Math.max(
+        0,
+        postAuthorTrustScore - Math.abs(aiJudgement.judgement_score) / 2,
+      );
+
+      //報告者の信頼度スコア小幅増加
+      const { error: reporterUpdateError } = await supabase
+        .from("profiles")
+        .update({ trust_score: newReporterTrustScore })
+        .eq("id", user.id);
+
+      //投稿者の信頼度スコア小幅減少
+      const { error: authorUpdateError } = await supabase
+        .from("profiles")
+        .update({ trust_score: newAuthorTrustScore })
+        .eq("id", postData.author_id);
+
+      //報告者に監視開始通知
+      await supabase.from("notifications").insert({
+        recipient_id: user.id,
+        content: `あなたの報告が受理され、該当投稿を監視対象に追加しました。\n 継続的な監視を行います。`,
+        is_read: false,
+      });
+
+      //投稿者に監視対象通知
+      await supabase.from("notifications").insert({
+        recipient_id: postData.author_id,
+        content: `あなたの投稿が監視対象に追加されました。\n 今後の投稿にご注意ください。`,
+        is_read: false,
+      });
+
+      if (reporterUpdateError || authorUpdateError) {
+        return NextResponse.json(
+          { error: "信頼度スコアの更新に失敗しました" },
+          { status: 500 },
+        );
+      }
     }
 
     // 報告を保存
@@ -272,14 +377,6 @@ export async function POST(request: Request) {
         { status: 500 },
       );
     }
-
-    // 報告処理結果をログ出力
-    console.log(`報告処理完了: 
-      報告者ID: ${user.id}, 
-      報告者信頼度: ${reporterTrustScore}, 
-      投稿者信頼度: ${postAuthorTrustScore}, 
-      報告重み: ${reportWeight}, 
-      累積報告重み: ${totalReportWeight}`);
 
     //await new Promise((resolve) => setTimeout(resolve, 10000));
 
