@@ -80,7 +80,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "認証エラー" }, { status: 401 });
   }
 
-  const { content } = await request.json();
+  const { content, parentId } = await request.json();
   console.log("Received content:", content);
 
   // AIでリライト＆分類
@@ -109,6 +109,7 @@ export async function POST(request: Request) {
           content: postContent,
           negativity_level: aiResult.negativity_level,
           visibility_level: aiResult.visibility_level,
+          parent_id: parentId ?? null,
         },
       ])
       .select();
@@ -177,6 +178,43 @@ export async function POST(request: Request) {
     console.error("サーバーエラー:", e);
     return NextResponse.json({ error: "サーバーエラー" }, { status: 500 });
   }
+}
+
+export async function GET(request: Request) {
+  const supabase = await createClient();
+  const { searchParams } = new URL(request.url);
+  const parentId = searchParams.get("parentId");
+
+  let q = supabase
+    .from("posts_with_like_counts")
+    .select(
+      `
+      id,
+      content,
+      created_at,
+      author_id,
+      parent_id,
+      visibility_level,
+      like_count,
+      reply_count,
+      likes(post_id, user_id),
+      reports(id),
+      author:profiles(nickname, trust_score)
+    `,
+    )
+    .order("created_at", { ascending: true });
+
+  if (parentId) {
+    q = q.eq("parent_id", parentId);
+  } else {
+    q = q.is("parent_id", null);
+  }
+
+  const { data, error } = await q;
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  return NextResponse.json(data, { status: 200 });
 }
 
 // CORS対応
