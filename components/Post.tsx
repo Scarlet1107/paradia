@@ -55,6 +55,7 @@ interface PostProps {
   parent_id: string | null;
   variant?: "reply";
   authorJoinedAt?: string | null;
+  onAfterReplyChange?: () => void;
 }
 
 export default function Post({
@@ -71,6 +72,7 @@ export default function Post({
   parent_id = null,
   authorJoinedAt,
   variant,
+  onAfterReplyChange,
 }: PostProps) {
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [liked, setLiked] = useState(initialLiked);
@@ -108,7 +110,8 @@ export default function Post({
       : Math.floor((Date.now() - joinedDate) / (1000 * 60 * 60 * 24));
 
   const loadReplies = async () => {
-    const res = await fetch(`/api/posts?parentId=${post.id}`);
+    const postId = post.id;
+    const res = await fetch(`/api/posts?parentId=${postId}`);
     if (!res.ok) return;
     const data: RawReply[] = await res.json();
     setReplies(
@@ -563,6 +566,7 @@ export default function Post({
                   initialReportCount={r.reports?.length ?? 0}
                   reply_count={r.reply_count ?? 0}
                   parent_id={r.parent_id ?? post.id}
+                  onAfterReplyChange={loadReplies}
                   authorJoinedAt={r.author?.joined_at}
                   onLikeUpdate={(newCount, isLiked) => {
                     setReplies((prev) =>
@@ -665,7 +669,11 @@ export default function Post({
                       `${isReply ? "返信" : "投稿"}が更新されました`,
                     );
                     setEditOpen(false);
-                    router.refresh();
+                    if (isReply && onAfterReplyChange) {
+                      onAfterReplyChange();
+                    } else {
+                      router.refresh();
+                    }
                   } else {
                     toast.error("更新に失敗しました");
                   }
@@ -720,7 +728,11 @@ export default function Post({
                       `${isReply ? "返信" : "投稿"}が削除されました`,
                     );
                     setDeleteOpen(false);
-                    router.refresh();
+                    if (isReply && onAfterReplyChange) {
+                      onAfterReplyChange();
+                    } else {
+                      router.refresh();
+                    }
                   } else {
                     toast.error("削除に失敗しました");
                   }
