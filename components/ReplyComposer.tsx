@@ -79,7 +79,7 @@ export default function ReplyComposer({
             key="collapsed"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
+            exit={{ opacity: 0, height: "auto" }}
             transition={{ duration: 0.2 }}
           >
             <Button
@@ -94,7 +94,7 @@ export default function ReplyComposer({
           // Expanded state - full composer
           <motion.div
             key="expanded"
-            initial={{ opacity: 0, height: 0 }}
+            initial={{ opacity: 0, height: "auto" }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{
@@ -141,7 +141,7 @@ export default function ReplyComposer({
                 size="sm"
                 onClick={handleCancel}
                 disabled={loading}
-                className="h-8 px-3 text-xs text-gray-600 hover:bg-gray-100 hover:text-gray-800"
+                className="h-8 px-3 text-xs text-orange-500 hover:bg-orange-100 hover:text-orange-700"
               >
                 <X className="mr-1 h-3 w-3" />
                 キャンセル
@@ -150,7 +150,7 @@ export default function ReplyComposer({
                 onClick={handleSubmit}
                 disabled={loading || isTooLong || !content.trim()}
                 size="sm"
-                className="h-8 bg-gradient-to-r from-orange-500 to-orange-600 px-3 text-xs hover:from-orange-600 hover:to-orange-700 disabled:from-gray-400 disabled:to-gray-500"
+                className="h-8 bg-gradient-to-r from-orange-400 to-orange-600 px-3 text-xs text-white hover:from-orange-500 hover:to-orange-700 disabled:from-orange-200 disabled:to-orange-300"
               >
                 {loading ? (
                   <div className="flex items-center gap-1">
