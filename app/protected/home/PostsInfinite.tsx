@@ -22,6 +22,8 @@ interface PostWithLikes {
     trust_score?: number;
   };
   reports?: { id: string }[];
+  reply_count: number;
+  parent_id: string | null;
 }
 
 interface PostsInfiniteProps {
@@ -48,7 +50,7 @@ export default function PostsInfinite({
   const useLikesSort = sortOrder === "most_liked";
   const tableName: TableName = "posts_with_like_counts";
   const columns =
-    "id, content, author_id, visibility_level, created_at, like_count, likes(post_id, user_id), author:profiles(nickname, trust_score), reports(id)";
+    "id, content, author_id, visibility_level, created_at, like_count, likes(post_id, user_id), author:profiles(nickname, trust_score), reports(id), parent_id, reply_count";
   const sortColumn = useLikesSort ? "like_count" : "created_at";
   const ascending = sortOrder === "asc";
 
@@ -97,6 +99,7 @@ export default function PostsInfinite({
           initialData={initialPosts}
           trailingQuery={(q) => {
             let builder = q as SupabaseSelectBuilder<TableName>;
+            builder = builder.is("parent_id", null);
             if (searchQuery) {
               builder = builder.ilike("content", `%${searchQuery}%`);
             }
@@ -118,6 +121,8 @@ export default function PostsInfinite({
 
             const nickname = post.author?.nickname ?? "抹消済み市民";
             const trustScore = post.author?.trust_score ?? 0;
+            const reply_count = post.reply_count ?? 0;
+            const parent_id = post.parent_id ?? null;
             return (
               <Post
                 key={post.id}
@@ -133,6 +138,8 @@ export default function PostsInfinite({
                 initialLikeCount={likeCount}
                 initialLiked={initialLiked}
                 initialReportCount={reportCount}
+                reply_count={reply_count}
+                parent_id={parent_id}
               />
             );
           }}
