@@ -14,6 +14,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 type PostComposerProps = {
   parentId?: string;
