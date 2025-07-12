@@ -1,9 +1,11 @@
 "use client";
 
+import type React from "react";
+
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
@@ -56,15 +58,17 @@ export function SignUpForm({
       className={cn("flex flex-col gap-6 px-4 md:px-0", className)}
       {...props}
     >
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">アカウント登録</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Card className="border-orange-200/50 bg-gradient-to-br from-white to-orange-50/30 shadow-lg">
+        <CardContent className="p-6">
+          <CardTitle className="mb-6 text-2xl text-gray-800">
+            アカウント登録
+          </CardTitle>
           <form onSubmit={handleSignUp}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="email">メールアドレス</Label>
+                <Label htmlFor="email" className="font-medium text-gray-700">
+                  メールアドレス
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -72,11 +76,17 @@ export function SignUpForm({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="border-gray-300 bg-white focus:border-orange-400 focus:ring-orange-400/20"
                 />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">パスワード</Label>
+                  <Label
+                    htmlFor="password"
+                    className="font-medium text-gray-700"
+                  >
+                    パスワード
+                  </Label>
                 </div>
                 <Input
                   id="password"
@@ -84,11 +94,17 @@ export function SignUpForm({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="border-gray-300 bg-white focus:border-orange-400 focus:ring-orange-400/20"
                 />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="repeat-password">パスワード（確認）</Label>
+                  <Label
+                    htmlFor="repeat-password"
+                    className="font-medium text-gray-700"
+                  >
+                    パスワード（確認）
+                  </Label>
                 </div>
                 <Input
                   id="repeat-password"
@@ -96,18 +112,25 @@ export function SignUpForm({
                   required
                   value={repeatPassword}
                   onChange={(e) => setRepeatPassword(e.target.value)}
+                  className="border-gray-300 bg-white focus:border-orange-400 focus:ring-orange-400/20"
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 font-medium text-white shadow-md transition-all duration-200 hover:from-orange-600 hover:to-orange-700 hover:shadow-lg"
+                disabled={isLoading}
+              >
                 {isLoading ? "アカウントを作成中…" : "登録する"}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-              すでにアカウントをお持ちですか？{" "}
+              <span className="text-gray-600">
+                すでにアカウントをお持ちですか？
+              </span>{" "}
               <Link
                 href="/auth/login"
-                className="text-blue-600 underline underline-offset-4 hover:text-blue-800"
+                className="font-medium text-orange-600 underline underline-offset-4 transition-colors hover:text-orange-700"
               >
                 ログイン
               </Link>
