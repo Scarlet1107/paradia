@@ -74,14 +74,22 @@ export default function PostComposer() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        asChild
-        className="fixed right-5 bottom-20 h-16 w-16 cursor-pointer md:right-12 md:bottom-12 md:h-20 md:w-20"
-      >
-        <Plus
-          size={24}
-          className="h-16 w-16 rounded-full bg-orange-500 text-white shadow-lg transition hover:bg-orange-600"
-        />
+      <DialogTrigger asChild>
+        <motion.button
+          className="fixed right-5 bottom-20 flex h-16 w-16 cursor-pointer items-center justify-center rounded-full bg-orange-500 text-white shadow-lg transition hover:bg-orange-600 md:right-12 md:bottom-12 md:h-20 md:w-20"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{
+            type: "spring",
+            stiffness: 400,
+            damping: 17,
+            duration: 0.3,
+          }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Plus size={24} className="md:h-10 md:w-10" />
+        </motion.button>
       </DialogTrigger>
 
       <DialogContent className="max-w-md overflow-hidden rounded-3xl border-2 border-orange-200/50 bg-gradient-to-br from-white/95 via-orange-50/95 to-orange-100/95 p-0 shadow-2xl backdrop-blur-2xl sm:max-w-lg">
