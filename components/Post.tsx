@@ -54,6 +54,7 @@ interface PostProps {
   reply_count: number;
   parent_id: string | null;
   variant?: "reply";
+  authorJoinedAt?: string | null;
 }
 
 export default function Post({
@@ -68,6 +69,7 @@ export default function Post({
   onLikeUpdate,
   reply_count = 0,
   parent_id = null,
+  authorJoinedAt,
   variant,
 }: PostProps) {
   const [likeCount, setLikeCount] = useState(initialLikeCount);
@@ -98,6 +100,12 @@ export default function Post({
     author?: Array<{ id: string; nickname: string; trust_score: number }>;
   };
   const [replies, setReplies] = useState<ReplyRow[]>([]);
+
+  const joinedDate = new Date(authorJoinedAt ?? "").getTime();
+  const daysAlive =
+    isNaN(joinedDate) || !authorJoinedAt
+      ? null
+      : Math.floor((Date.now() - joinedDate) / (1000 * 60 * 60 * 24));
 
   const loadReplies = async () => {
     const res = await fetch(`/api/posts?parentId=${post.id}`);
@@ -272,6 +280,13 @@ export default function Post({
                       You
                     </Badge>
                   )}
+                  {userId !== authorId &&
+                    hasPermission &&
+                    daysAlive !== null && (
+                      <div className="mb-1.5 text-[8px] leading-tight font-medium tracking-wide text-orange-600 sm:text-[10px] md:text-xs">
+                        生存日数：{daysAlive}日
+                      </div>
+                    )}
                 </div>
               </div>
               <div className="absolute top-2 left-1/2 z-0 -translate-x-1/2 transform sm:top-4 md:top-6">
@@ -547,6 +562,7 @@ export default function Post({
                   initialReportCount={r.reports?.length ?? 0}
                   reply_count={r.reply_count ?? 0}
                   parent_id={r.parent_id ?? post.id}
+                  authorJoinedAt={r.author?.joined_at}
                   onLikeUpdate={(newCount, isLiked) => {
                     setReplies((prev) =>
                       prev.map((x) =>

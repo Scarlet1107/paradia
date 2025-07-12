@@ -20,6 +20,7 @@ interface PostWithLikes {
   author: {
     nickname?: string;
     trust_score?: number;
+    created_at?: string;
   };
   reports?: { id: string }[];
   reply_count: number;
@@ -50,7 +51,7 @@ export default function PostsInfinite({
   const useLikesSort = sortOrder === "most_liked";
   const tableName: TableName = "posts_with_like_counts";
   const columns =
-    "id, content, author_id, visibility_level, created_at, like_count, likes(post_id, user_id), author:profiles(nickname, trust_score), reports(id), parent_id, reply_count";
+    "id, content, author_id, visibility_level, created_at, like_count, likes(post_id, user_id), author:profiles(nickname, trust_score, created_at), reports(id), parent_id, reply_count";
   const sortColumn = useLikesSort ? "like_count" : "created_at";
   const ascending = sortOrder === "asc";
 
@@ -119,10 +120,12 @@ export default function PostsInfinite({
             const initialLiked =
               post.likes?.some((l) => l.user_id === userId) ?? false;
 
+            const author_id = post.author_id ?? null;
             const nickname = post.author?.nickname ?? "抹消済み市民";
             const trustScore = post.author?.trust_score ?? 0;
             const reply_count = post.reply_count ?? 0;
             const parent_id = post.parent_id ?? null;
+            const created_at = post.author?.created_at ?? null;
             return (
               <Post
                 key={post.id}
@@ -138,6 +141,7 @@ export default function PostsInfinite({
                 initialLikeCount={likeCount}
                 initialLiked={initialLiked}
                 initialReportCount={reportCount}
+                authorJoinedAt={created_at}
                 reply_count={reply_count}
                 parent_id={parent_id}
               />
