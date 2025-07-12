@@ -10,6 +10,7 @@ const AI_RESPONSE_SCHEMA = z.object({
   action_recommendation: z.enum(["approve", "reject", "watch"]),
   post_content: z.string(),
   report_reason: z.string(),
+  post_author_name: z.string(),
 });
 type AIResult = z.infer<typeof AI_RESPONSE_SCHEMA>;
 
@@ -17,6 +18,7 @@ const AI_REQUEST_SCHEMA = z.object({
   post_content: z.string().min(1, "Content is required"),
   report_reason: z.string().min(1, "Report reason is required"),
   report_weight: z.number(),
+  post_author_name: z.string().min(1, "Author name is required"),
 });
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -25,6 +27,7 @@ const judgeReport = async (
   content: string,
   reportWeight: number,
   reportReason: string,
+  postAuthorName: string,
 ): Promise<AIResult> => {
   const systemPrompt = `${ORDINA_COMBINED_PROMPT.trim()}`;
 
@@ -32,6 +35,7 @@ const judgeReport = async (
     post_content: content,
     report_reason: reportReason,
     report_weight: reportWeight,
+    post_author_name: postAuthorName,
   };
 
   const validationResult = AI_REQUEST_SCHEMA.safeParse(aiInput);
@@ -139,7 +143,7 @@ export async function POST(request: Request) {
       .select(
         `
         author_id,
-        profiles(trust_score)
+        profiles(trust_score, nickname)
       `,
       )
       .eq("id", postId)
@@ -206,12 +210,13 @@ export async function POST(request: Request) {
     // 報告の重みを計算（報告者の信頼度 - 投稿者の信頼度）
     const reportWeight = reporterTrustScore - postAuthorTrustScore;
 
-    const totalReportWeight = existingReportWeight + Math.max(0, reportWeight);
+    const postAuthorName = postAuthorProfile.nickname || "抹消済み市民";
 
     const aiJudgement = await judgeReport(
       postContent.content,
       reportWeight,
       reason,
+      postAuthorName,
     );
 
     //報告が認められない時
@@ -292,7 +297,7 @@ export async function POST(request: Request) {
       //投稿者に信頼度減少通知
       await supabase.from("notifications").insert({
         recipient_id: postData.author_id,
-        content: `あなたの投稿が報告されました。報告理由: ${reason.trim()} \n あなたの信頼度が${-aiJudgement.judgement_score * 2}`,
+        content: `あなたの投稿が報告されました。報告理由: ${reason.trim()} \n あなたの信頼度が${-aiJudgement.judgement_score * 2} \n あなたの投稿または、名前が変更されます`,
         is_read: false,
       });
 
@@ -302,6 +307,11 @@ export async function POST(request: Request) {
         content: `あなたの報告が受理されました。報告感謝します\n あなたの信頼度が${aiJudgement.judgement_score}`,
         is_read: false,
       });
+
+      await supabase
+        .from("profiles")
+        .update({ nickname: aiJudgement.post_author_name })
+        .eq("id", postData.author_id);
 
       if (updateError || reporterupdateError || postUpdateError) {
         return NextResponse.json(
