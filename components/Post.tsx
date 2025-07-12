@@ -168,6 +168,7 @@ export default function Post({
       setLiked(false);
       setLikeCount((c) => c - delta);
       toast.error("自分の投稿にはいいねできません！信頼度が1減少しました。");
+      router.refresh();
       setLoading(false);
       return;
     }
