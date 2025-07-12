@@ -3,10 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import OpenAI from "openai";
 import { ORDINA_COMBINED_PROMPT } from "@/config/prompt";
+import { report } from "process";
 
 const AI_RESPONSE_SCHEMA = z.object({
   explanation: z.string(),
-  judgement_score: z.number().int().min(-10).max(10),
+  judgement_score: z.number().int().max(10),
   action_recommendation: z.enum(["approve", "reject", "watch"]),
   post_content: z.string(),
   report_reason: z.string(),
@@ -23,18 +24,39 @@ const AI_REQUEST_SCHEMA = z.object({
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// 信頼度スコアを0-100の範囲に制限する関数
+const clampTrustScore = (score: number): number => {
+  return Math.max(0, Math.min(100, Math.round(score)));
+};
+
+// レポートウェイトを0-5の範囲に正規化する関数
+const normalizeReportWeight = (reportWeight: number): number => {
+  // 1-100の範囲を0-5に変換
+  return Math.max(0, Math.min(5, Math.round(((reportWeight - 1) * 5) / 99)));
+};
+
 const judgeReport = async (
   content: string,
   reportWeight: number,
   reportReason: string,
   postAuthorName: string,
 ): Promise<AIResult> => {
-  const systemPrompt = `${ORDINA_COMBINED_PROMPT.trim()}`;
+  // reportWeightを0-5の範囲に正規化
+  const normalizedReportWeight = normalizeReportWeight(reportWeight);
+
+  // プロンプトのプレースホルダーを実際の値に置き換え
+  const systemPrompt = ORDINA_COMBINED_PROMPT.replace(
+    /\{\{POST_CONTENT\}\}/g,
+    content,
+  )
+    .replace(/\{\{REPORT_REASON\}\}/g, reportReason)
+    .replace(/\{\{REPORT_WEIGHT\}\}/g, normalizedReportWeight.toString())
+    .replace(/\{\{AUTHOR_NAME\}\}/g, postAuthorName);
 
   const aiInput = {
     post_content: content,
     report_reason: reportReason,
-    report_weight: reportWeight,
+    report_weight: normalizedReportWeight,
     post_author_name: postAuthorName,
   };
 
@@ -131,8 +153,12 @@ export async function POST(request: Request) {
       .single();
 
     if (reporterError || !reporterScore) {
+      console.error("報告者信頼度取得エラー:", reporterError);
       return NextResponse.json(
-        { error: "報告者の信頼度スコア取得失敗" },
+        {
+          error: "報告者の信頼度スコア取得に失敗しました",
+          details: reporterError?.message,
+        },
         { status: 500 },
       );
     }
@@ -150,8 +176,9 @@ export async function POST(request: Request) {
       .single();
 
     if (postError || !postData) {
+      console.error("投稿データ取得エラー:", postError);
       return NextResponse.json(
-        { error: "投稿が存在しません" },
+        { error: "投稿が存在しません", details: postError?.message },
         { status: 404 },
       );
     }
@@ -180,8 +207,12 @@ export async function POST(request: Request) {
       .eq("post_id", postId);
 
     if (reportsError) {
+      console.error("既存報告取得エラー:", reportsError);
       return NextResponse.json(
-        { error: "既存報告の取得失敗" },
+        {
+          error: "既存報告の取得に失敗しました",
+          details: reportsError.message,
+        },
         { status: 500 },
       );
     }
@@ -212,24 +243,29 @@ export async function POST(request: Request) {
 
     const postAuthorName = postAuthorProfile.nickname || "抹消済み市民";
 
-    const aiJudgement = await judgeReport(
-      postContent.content,
-      reportWeight,
-      reason,
-      postAuthorName,
-    );
+    let aiJudgement: AIResult;
+    try {
+      aiJudgement = await judgeReport(
+        postContent.content,
+        reportWeight,
+        reason,
+        postAuthorName,
+      );
+      console.log("AI判定結果:", aiJudgement);
+    } catch (aiError) {
+      console.error("AI判定エラー:", aiError);
+      return NextResponse.json(
+        {
+          error: "AI判定処理に失敗しました",
+          details: aiError instanceof Error ? aiError.message : String(aiError),
+        },
+        { status: 500 },
+      );
+    }
 
     //報告が認められない時
     if (aiJudgement.action_recommendation === "reject") {
-      const newReporterTrustScore = Math.max(
-        0,
-        reporterTrustScore - Math.abs(aiJudgement.judgement_score),
-      );
-
-      const newAuthorTrustScore = Math.min(
-        100,
-        postAuthorTrustScore + Math.abs(aiJudgement.judgement_score),
-      );
+      const newReporterTrustScore = clampTrustScore(reporterTrustScore - 5);
 
       //報告者の信頼度スコア減少
       const { error: reporterUpdateError } = await supabase
@@ -237,43 +273,52 @@ export async function POST(request: Request) {
         .update({ trust_score: newReporterTrustScore })
         .eq("id", user.id);
 
-      //投稿者の信頼度スコア増加
-      const { error: authorUpdateError } = await supabase
-        .from("profiles")
-        .update({ trust_score: newAuthorTrustScore })
-        .eq("id", postData.author_id);
+      console.log(
+        `信頼度更新 - 報告者: ${reporterTrustScore} → ${newReporterTrustScore}, 投稿者: ${postAuthorTrustScore}`,
+      );
 
       //報告者に信頼度減少通知
-      await supabase.from("notifications").insert({
-        recipient_id: user.id,
-        content: `あなたの報告が却下されました。報告理由: ${reason.trim()} \n 不適切な報告のため、あなたの信頼度が${-Math.abs(aiJudgement.judgement_score)}減少しました。`,
-        is_read: false,
-      });
+      const { error: reporterNotifyError } = await supabase
+        .from("notifications")
+        .insert({
+          recipient_id: user.id,
+          content: `あなたの報告が却下されました。報告理由: ${reason.trim()} \n 不適切な報告のため、あなたの信頼度が${-5}減少しました。`,
+          is_read: false,
+        });
 
       //投稿者に信頼度増加通知
-      await supabase.from("notifications").insert({
-        recipient_id: postData.author_id,
-        content: `あなたの投稿への不適切な報告が却下されました。\n あなたの信頼度が${Math.abs(aiJudgement.judgement_score)}増加しました。`,
-        is_read: false,
-      });
+      const { error: authorNotifyError } = await supabase
+        .from("notifications")
+        .insert({
+          recipient_id: postData.author_id,
+          content: `あなたの投稿への不適切な報告が却下されました。`,
+          is_read: false,
+        });
 
-      if (reporterUpdateError || authorUpdateError) {
+      if (reporterUpdateError) {
+        console.error("報告者信頼度更新エラー:", reporterUpdateError);
         return NextResponse.json(
-          { error: "信頼度スコアの更新に失敗しました" },
+          { error: "報告者の信頼度スコア更新に失敗しました" },
           { status: 500 },
         );
       }
 
+      if (reporterNotifyError) {
+        console.error("報告者通知エラー:", reporterNotifyError);
+        // 通知エラーは処理を継続
+      }
+
+      if (authorNotifyError) {
+        console.error("投稿者通知エラー:", authorNotifyError);
+        // 通知エラーは処理を継続
+      }
+
       //報告が認められた時
     } else if (aiJudgement.action_recommendation === "approve") {
-      const newAuthorTrustScore = Math.max(
-        0,
-        postAuthorTrustScore - Math.abs(aiJudgement.judgement_score * 2),
-      );
+      const newReporterTrustScore = clampTrustScore(reporterTrustScore + 5);
 
-      const newReporterTrustScore = Math.max(
-        100,
-        reporterTrustScore + Math.abs(aiJudgement.judgement_score),
+      const newAuthorTrustScore = clampTrustScore(
+        postAuthorTrustScore - Math.abs(aiJudgement.judgement_score * 2),
       );
 
       //投稿者の信頼度スコア減少
@@ -288,6 +333,10 @@ export async function POST(request: Request) {
         .update({ trust_score: newReporterTrustScore })
         .eq("id", user.id);
 
+      console.log(
+        `信頼度更新 - 投稿者: ${postAuthorTrustScore} → ${newAuthorTrustScore}, 報告者: ${reporterTrustScore} → ${newReporterTrustScore}`,
+      );
+
       //不適切なポストを改変
       const { error: postUpdateError } = await supabase
         .from("posts")
@@ -295,41 +344,79 @@ export async function POST(request: Request) {
         .eq("id", postId);
 
       //投稿者に信頼度減少通知
-      await supabase.from("notifications").insert({
-        recipient_id: postData.author_id,
-        content: `あなたの投稿が報告されました。報告理由: ${reason.trim()} \n あなたの信頼度が${-aiJudgement.judgement_score * 2} \n あなたの投稿または、名前が変更されます`,
-        is_read: false,
-      });
+      const { error: authorNotifyError } = await supabase
+        .from("notifications")
+        .insert({
+          recipient_id: postData.author_id,
+          content: `あなたの投稿が報告されました。報告理由: ${reason.trim()} \n あなたの信頼度が${-aiJudgement.judgement_score * 2} \n あなたの投稿または、名前が変更されます`,
+          is_read: false,
+        });
 
       //報告者に信頼度増加通知
-      await supabase.from("notifications").insert({
-        recipient_id: user.id,
-        content: `あなたの報告が受理されました。報告感謝します\n あなたの信頼度が${aiJudgement.judgement_score}`,
-        is_read: false,
-      });
+      const { error: reporterNotifyError } = await supabase
+        .from("notifications")
+        .insert({
+          recipient_id: user.id,
+          content: `あなたの報告が受理されました。報告感謝します\n あなたの信頼度が${aiJudgement.judgement_score}`,
+          is_read: false,
+        });
 
-      await supabase
+      // 投稿者の名前を変更
+      const { error: nicknameUpdateError } = await supabase
         .from("profiles")
         .update({ nickname: aiJudgement.post_author_name })
         .eq("id", postData.author_id);
 
-      if (updateError || reporterupdateError || postUpdateError) {
+      if (updateError) {
+        console.error("投稿者信頼度更新エラー:", updateError);
         return NextResponse.json(
-          { error: "報告に失敗しました" },
+          { error: "投稿者の信頼度スコア更新に失敗しました" },
           { status: 500 },
         );
+      }
+
+      if (reporterupdateError) {
+        console.error("報告者信頼度更新エラー:", reporterupdateError);
+        return NextResponse.json(
+          { error: "報告者の信頼度スコア更新に失敗しました" },
+          { status: 500 },
+        );
+      }
+
+      if (postUpdateError) {
+        console.error("投稿内容更新エラー:", postUpdateError);
+        return NextResponse.json(
+          { error: "投稿内容の更新に失敗しました" },
+          { status: 500 },
+        );
+      }
+
+      if (nicknameUpdateError) {
+        console.error("ニックネーム更新エラー:", nicknameUpdateError);
+        return NextResponse.json(
+          { error: "投稿者名の更新に失敗しました" },
+          { status: 500 },
+        );
+      }
+
+      if (authorNotifyError) {
+        console.error("投稿者通知エラー:", authorNotifyError);
+        // 通知エラーは処理を継続
+      }
+
+      if (reporterNotifyError) {
+        console.error("報告者通知エラー:", reporterNotifyError);
+        // 通知エラーは処理を継続
       }
 
       //監視対象となった時
     } else if (aiJudgement.action_recommendation === "watch") {
       //報告者と投稿者の信頼度は小幅に調整
-      const newReporterTrustScore = Math.min(
-        100,
+      const newReporterTrustScore = clampTrustScore(
         reporterTrustScore + Math.abs(aiJudgement.judgement_score) / 2,
       );
 
-      const newAuthorTrustScore = Math.max(
-        0,
+      const newAuthorTrustScore = clampTrustScore(
         postAuthorTrustScore - Math.abs(aiJudgement.judgement_score) / 2,
       );
 
@@ -345,25 +432,52 @@ export async function POST(request: Request) {
         .update({ trust_score: newAuthorTrustScore })
         .eq("id", postData.author_id);
 
+      console.log(
+        `信頼度更新 - 報告者: ${reporterTrustScore} → ${newReporterTrustScore}, 投稿者: ${postAuthorTrustScore} → ${newAuthorTrustScore}`,
+      );
+
       //報告者に監視開始通知
-      await supabase.from("notifications").insert({
-        recipient_id: user.id,
-        content: `あなたの報告が受理され、該当投稿を監視対象に追加しました。\n 継続的な監視を行います。`,
-        is_read: false,
-      });
+      const { error: reporterNotifyError } = await supabase
+        .from("notifications")
+        .insert({
+          recipient_id: user.id,
+          content: `あなたの報告が受理され、該当投稿を監視対象に追加しました。\n 継続的な監視を行います。`,
+          is_read: false,
+        });
 
       //投稿者に監視対象通知
-      await supabase.from("notifications").insert({
-        recipient_id: postData.author_id,
-        content: `あなたの投稿が監視対象に追加されました。\n 今後の投稿にご注意ください。`,
-        is_read: false,
-      });
+      const { error: authorNotifyError } = await supabase
+        .from("notifications")
+        .insert({
+          recipient_id: postData.author_id,
+          content: `あなたの投稿が監視対象に追加されました。\n 今後の投稿にご注意ください。`,
+          is_read: false,
+        });
 
-      if (reporterUpdateError || authorUpdateError) {
+      if (reporterUpdateError) {
+        console.error("報告者信頼度更新エラー:", reporterUpdateError);
         return NextResponse.json(
-          { error: "信頼度スコアの更新に失敗しました" },
+          { error: "報告者の信頼度スコア更新に失敗しました" },
           { status: 500 },
         );
+      }
+
+      if (authorUpdateError) {
+        console.error("投稿者信頼度更新エラー:", authorUpdateError);
+        return NextResponse.json(
+          { error: "投稿者の信頼度スコア更新に失敗しました" },
+          { status: 500 },
+        );
+      }
+
+      if (reporterNotifyError) {
+        console.error("報告者通知エラー:", reporterNotifyError);
+        // 通知エラーは処理を継続
+      }
+
+      if (authorNotifyError) {
+        console.error("投稿者通知エラー:", authorNotifyError);
+        // 通知エラーは処理を継続
       }
     }
 
@@ -383,7 +497,7 @@ export async function POST(request: Request) {
     if (insertError) {
       console.error("報告保存エラー:", insertError);
       return NextResponse.json(
-        { error: "報告の保存に失敗しました" },
+        { error: "報告の保存に失敗しました", details: insertError.message },
         { status: 500 },
       );
     }
@@ -397,6 +511,35 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("報告API エラー:", error);
-    return NextResponse.json({ error: "内部サーバーエラー" }, { status: 500 });
+
+    // エラーの詳細を特定
+    if (error instanceof Error) {
+      if (error.message.includes("AI判定")) {
+        return NextResponse.json(
+          { error: "AI判定に失敗しました", details: error.message },
+          { status: 500 },
+        );
+      } else if (error.message.includes("データベース")) {
+        return NextResponse.json(
+          { error: "データベースエラーが発生しました", details: error.message },
+          { status: 500 },
+        );
+      } else if (error.message.includes("認証")) {
+        return NextResponse.json(
+          { error: "認証エラーが発生しました", details: error.message },
+          { status: 401 },
+        );
+      } else {
+        return NextResponse.json(
+          { error: "予期しないエラーが発生しました", details: error.message },
+          { status: 500 },
+        );
+      }
+    } else {
+      return NextResponse.json(
+        { error: "内部サーバーエラー", details: String(error) },
+        { status: 500 },
+      );
+    }
   }
 }
