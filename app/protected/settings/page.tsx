@@ -17,7 +17,7 @@ export default async function ProtectedPage() {
   // --- プロフィール取得（省略） ---
   const { data: userData, error: profileError } = await supabase
     .from("profiles")
-    .select("trust_score, nickname")
+    .select("trust_score, nickname, created_at")
     .eq("id", user.id)
     .single();
   if (profileError || !userData) redirect("/auth/login");
@@ -34,6 +34,11 @@ export default async function ProtectedPage() {
   }
   const postCount = count ?? 0;
 
+  const createdAt = new Date(userData.created_at);
+  const now = new Date();
+  const diffTime = now.getTime() - createdAt.getTime();
+  const survivedDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
   return (
     <div className="p-4">
       <div className="mx-auto max-w-4xl space-y-6">
@@ -45,6 +50,7 @@ export default async function ProtectedPage() {
               nickname={userData.nickname}
               trust_score={userData.trust_score}
               count={postCount}
+              survivedDays={survivedDays}
             />
           </div>
 

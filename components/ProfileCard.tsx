@@ -8,14 +8,15 @@ interface ProfileCardProps {
   trust_score: number;
   nickname: string;
   count: number;
+  survivedDays: number;
 }
 
 export default function ProfileCard({
   trust_score,
   nickname,
   count,
+  survivedDays = 0,
 }: ProfileCardProps) {
-  const accountDays = 365; // アカウント作成からの日数
   const badgeUrl = getBadgeUrlFromScore(trust_score);
 
   return (
@@ -63,13 +64,13 @@ export default function ProfileCard({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-orange-700">
               <Calendar className="h-4 w-4" />
-              <span className="text-sm font-medium">アカウント歴</span>
+              <span className="text-sm font-medium">市民歴</span>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold text-orange-900">
-                {accountDays}
+              <div className="space-x-1 text-2xl font-bold text-orange-900">
+                <span>{survivedDays}</span>
+                <span className="text-xs text-orange-600">日</span>
               </div>
-              <div className="text-xs text-orange-600">日</div>
             </div>
           </div>
         </div>
