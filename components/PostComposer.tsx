@@ -84,8 +84,14 @@ export default function PostComposer({
 
       setOpen(false);
       setContent("");
+
+      // 親コンポーネントの状態を先に更新
       onSuccess?.();
-      router.refresh();
+
+      // 少し遅延させてからrefresh（状態更新を待つ）
+      setTimeout(() => {
+        router.refresh();
+      }, 100);
     } catch (err) {
       console.error("投稿中のエラー:", err);
       toast.error("投稿中にエラーが発生しました");
