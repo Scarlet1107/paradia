@@ -19,6 +19,9 @@ const UpdateNicknameInput = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  const maxLength = 20;
+  const isTooLong = input.length > maxLength;
+
   const isUnchanged = useMemo(
     () =>
       input.trim() ===
@@ -40,6 +43,12 @@ const UpdateNicknameInput = () => {
     if (!input.trim()) {
       setIsError(true);
       setMessage("ニックネームを入力してください");
+      return;
+    }
+
+    if (isTooLong) {
+      setIsError(true);
+      setMessage(`ニックネームは${maxLength}文字以内で入力してください`);
       return;
     }
 
@@ -93,6 +102,22 @@ const UpdateNicknameInput = () => {
             onChange={(e) => setInput(e.target.value)}
             disabled={loading}
           />
+
+          {/* 文字数カウンター */}
+          <div className="flex justify-between text-xs">
+            <div
+              className={`font-medium ${
+                isTooLong ? "text-red-500" : "text-orange-600/80"
+              }`}
+            >
+              {input.length}/{maxLength}文字
+              {isTooLong && (
+                <div className="mt-1 text-xs text-red-500">
+                  {maxLength}文字を超えています
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {isUnchanged && !loading && (
@@ -104,7 +129,7 @@ const UpdateNicknameInput = () => {
         <Button
           className="w-full bg-orange-500 text-white hover:bg-orange-600"
           onClick={handleSubmit}
-          disabled={loading || isUnchanged}
+          disabled={loading || isUnchanged || isTooLong}
         >
           {loading ? (
             <>
