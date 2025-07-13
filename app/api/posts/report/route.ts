@@ -282,7 +282,7 @@ export async function POST(request: Request) {
         .from("notifications")
         .insert({
           recipient_id: user.id,
-          content: `あなたの報告が却下されました。報告理由: ${reason.trim()} \n 不適切な報告のため、あなたの信頼度が${-5}減少しました。`,
+          content: `あなたの報告が却下されました。報告理由: ${reason.trim()} \n 不適切な報告のため、あなたの信頼度：${-5}`,
           is_read: false,
         });
 
@@ -333,10 +333,6 @@ export async function POST(request: Request) {
         .update({ trust_score: newReporterTrustScore })
         .eq("id", user.id);
 
-      console.log(
-        `信頼度更新 - 投稿者: ${postAuthorTrustScore} → ${newAuthorTrustScore}, 報告者: ${reporterTrustScore} → ${newReporterTrustScore}`,
-      );
-
       //不適切なポストを改変
       const { error: postUpdateError } = await supabase
         .from("posts")
@@ -348,7 +344,7 @@ export async function POST(request: Request) {
         .from("notifications")
         .insert({
           recipient_id: postData.author_id,
-          content: `あなたの投稿が報告されました。報告理由: ${reason.trim()} \n あなたの信頼度が${-aiJudgement.judgement_score * 2} \n あなたの投稿または、名前が変更されます`,
+          content: `あなたの投稿が報告されました。報告理由: ${reason.trim()} \n あなたの信頼度：${-aiJudgement.judgement_score * 2} \n あなたの投稿または、名前が変更される可能性があります`,
           is_read: false,
         });
 
@@ -357,7 +353,7 @@ export async function POST(request: Request) {
         .from("notifications")
         .insert({
           recipient_id: user.id,
-          content: `あなたの報告が受理されました。報告感謝します\n あなたの信頼度が${aiJudgement.judgement_score}`,
+          content: `あなたの報告が受理されました。報告感謝します\n あなたの信頼度：+${aiJudgement.judgement_score}`,
           is_read: false,
         });
 
@@ -431,10 +427,6 @@ export async function POST(request: Request) {
         .from("profiles")
         .update({ trust_score: newAuthorTrustScore })
         .eq("id", postData.author_id);
-
-      console.log(
-        `信頼度更新 - 報告者: ${reporterTrustScore} → ${newReporterTrustScore}, 投稿者: ${postAuthorTrustScore} → ${newAuthorTrustScore}`,
-      );
 
       //報告者に監視開始通知
       const { error: reporterNotifyError } = await supabase

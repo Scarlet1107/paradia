@@ -110,6 +110,7 @@ export default function ReportDialog({
 
   const handleCloseResult = () => {
     setReportResult(null);
+    router.refresh();
   };
 
   return (
