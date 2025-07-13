@@ -105,13 +105,6 @@ const UpdateNicknameInput = () => {
 
           {/* 文字数カウンター */}
           <div className="flex justify-between text-xs">
-            <div className="text-orange-600/70">
-              {input.length > 0 && (
-                <span className="rounded-full bg-orange-100/80 px-2 py-1">
-                  {input.length}文字入力中
-                </span>
-              )}
-            </div>
             <div
               className={`font-medium ${
                 isTooLong ? "text-red-500" : "text-orange-600/80"
