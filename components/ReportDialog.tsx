@@ -13,12 +13,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
+import ReportResult from "./ReportResult";
 
 interface ReportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   postId: string;
   onReportSubmitted?: () => void;
+}
+
+type ReportStatus = "approve" | "reject" | null;
+
+interface ReportResponse {
+  action_recommendation: ReportStatus;
+  explanation: string;
 }
 
 const REPORT_REASONS = [
@@ -39,6 +48,11 @@ export default function ReportDialog({
   const [selectedReason, setSelectedReason] = useState("");
   const [customReason, setCustomReason] = useState("");
   const [loading, setLoading] = useState(false);
+  const [reportResult, setReportResult] = useState<{
+    status: ReportStatus;
+    explanation: string;
+  } | null>(null);
+  const router = useRouter();
 
   const handleSubmit = async () => {
     const reason = selectedReason === "その他" ? customReason : selectedReason;
@@ -57,7 +71,7 @@ export default function ReportDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           postId,
-          content: reason,
+          reason: reason,
         }),
       });
 
@@ -67,24 +81,36 @@ export default function ReportDialog({
         if (data.error === "Already reported") {
           toast.error("この投稿は既に報告済みです");
         } else {
-          toast.error("報告の送信に失敗しました");
+          toast.error("報告の送信に失敗しました" + `\n ${res.statusText}`);
         }
         return;
       }
 
-      toast.success("報告を送信しました");
+      const reportResponse = data as ReportResponse;
+
+      // ダイアログを閉じて結果を表示
       onOpenChange(false);
-      onReportSubmitted?.();
+      setReportResult({
+        status: reportResponse.action_recommendation,
+        explanation: reportResponse.explanation,
+      });
 
       // フォームをリセット
       setSelectedReason("");
       setCustomReason("");
+
+      onReportSubmitted?.();
     } catch (error) {
       console.error("報告送信エラー:", error);
       toast.error("報告の送信中にエラーが発生しました");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCloseResult = () => {
+    setReportResult(null);
+    router.refresh();
   };
 
   return (
@@ -156,6 +182,15 @@ export default function ReportDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* 報告結果の表示 */}
+      {reportResult && (
+        <ReportResult
+          status={reportResult.status}
+          explanation={reportResult.explanation}
+          onClose={handleCloseResult}
+        />
+      )}
     </Dialog>
   );
 }

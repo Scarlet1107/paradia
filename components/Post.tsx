@@ -129,6 +129,8 @@ export default function Post({
 
   // 権限チェック: 自分の投稿でない場合のみチェック
   const isOwnPost = userId === authorId;
+  const isAuthorDeleted =
+    author === "抹消済み市民" || !authorId || authorId === "";
   const hasPermission =
     isOwnPost ||
     !visubilityLevel ||
@@ -424,13 +426,23 @@ export default function Post({
               <Button
                 variant="ghost"
                 size="sm"
-                disabled={!hasPermission}
+                disabled={!hasPermission || isOwnPost || isAuthorDeleted}
                 className={`flex min-w-0 items-center text-orange-500 transition-colors hover:bg-orange-50 hover:text-orange-600 ${
                   isReply
                     ? "h-6 px-2 text-xs hover:bg-orange-100 hover:text-orange-600"
                     : "gap-0.5 rounded-md p-1 sm:gap-1 sm:rounded-lg sm:p-1.5 md:p-2"
-                } ${!hasPermission ? "cursor-not-allowed opacity-50" : ""} `}
-                onClick={() => setReportDialogOpen(true)}
+                } ${!hasPermission || isOwnPost || isAuthorDeleted ? "cursor-not-allowed opacity-50" : ""} `}
+                onClick={() => {
+                  if (isOwnPost) {
+                    toast.error("自分の投稿は報告できません");
+                    return;
+                  }
+                  if (isAuthorDeleted) {
+                    toast.error("削除されたアカウントの投稿は報告できません");
+                    return;
+                  }
+                  setReportDialogOpen(true);
+                }}
               >
                 <UserX
                   className={`flex-shrink-0 ${isReply ? "mr-1 h-3 w-3" : "h-3 w-3 sm:h-4 sm:w-4"}`}
@@ -588,7 +600,7 @@ export default function Post({
       )}
 
       <ReportDialog
-        open={reportDialogOpen}
+        open={reportDialogOpen && !isOwnPost && !isAuthorDeleted}
         onOpenChange={setReportDialogOpen}
         postId={post.id}
         onReportSubmitted={handleReportSubmitted}
