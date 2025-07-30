@@ -15,7 +15,7 @@ export async function moderateNickname(nickname: string): Promise<boolean> {
   try {
     // 1) Moderation API で一般的な不適切表現をチェック
     const modRes = await openai.moderations.create({
-      model: "text-moderation-stable",
+      model: "omni-moderation-latest",
       input: nickname,
     });
     const mod = modRes.results?.[0];
